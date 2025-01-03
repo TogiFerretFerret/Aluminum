@@ -6,6 +6,7 @@ from waitress import serve
 import multiprocessing
 import os
 import signal
+import CONFIG
 # test
 def finish_auth(oauth_url):
         with open("tmp.txt", "w") as f:
@@ -24,7 +25,7 @@ def run_server():
 def goog_murl(uid):
     wrap = authwrapper.BbAuthWrapper(uid)
     gurl = wrap.goog_oauthurl()
-    gurl = f"https://glowing-system-9rr9gjjg7w7cp6wx-8080.app.github.dev/?url={gurl}"
+    gurl = f"{CONFIG.proxyurl}/?url={gurl}"
     return gurl
 def goog_megaauth():
     with open("tmp.txt", "w") as f:
