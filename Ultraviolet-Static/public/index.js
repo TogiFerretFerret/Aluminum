@@ -44,7 +44,7 @@ async function main(url){
 		var test=frame.contentWindow.location.href;
 		test=reverseEncoding(test.split("/uv/service/")[1]);
 		if (test.startsWith("https://sts.sky.blackbaud.com/") && !dostop) {
-			location.href = ""+btoa(test);
+			location.href = "https://CODESPACEURL-PORT.app.github.dev/seturl?url="+btoa(test);
 			dostop=true;
 		}
 	}, 200);
