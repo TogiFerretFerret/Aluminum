@@ -25,7 +25,7 @@ def run_server():
 def goog_murl(uid):
     wrap = authwrapper.BbAuthWrapper(uid)
     gurl = wrap.goog_oauthurl()
-    gurl = f"{CONFIG.proxyurl}/?url={gurl}"
+    gurl = f"{CONFIG.proxyurl}/?redirector={CONFIG.self_url}&url={gurl}"
     return gurl
 def goog_megaauth():
     with open("tmp.txt", "w") as f:
