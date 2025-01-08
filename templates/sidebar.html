@@ -1,0 +1,44 @@
+{% macro sidebar() -%}
+<header class="header">
+    <div class="logo" style="color: #a3a7a9;">Aluminum</div>
+    <div class="header-actions">
+        <i class="fas fa-search"></i>
+        <i class="fas fa-bell"></i>
+        <i class="fas fa-user-circle"></i>
+    </div>
+</header>
+
+<nav class="sidebar">
+    <a href="/" class="nav-link"> 
+    <div class="nav-item">
+    <i class="fas fa-home"></i>
+    Dashboard
+    </div></a><!--
+    <div class="nav-item">
+        <i class="fas fa-book"></i>
+        Courses
+    </div>
+    -->
+    <a href="/calendar" class="nav-link">
+    <div class="nav-item">
+        <i class="fas fa-calendar"></i>
+        Calendar
+    </div></a>
+    <!--
+    <div class="nav-item">
+        <i class="fas fa-inbox"></i>
+        Messages
+    </div>-->
+    <a href="/grades" class="nav-link">
+    <div class="nav-item">
+        <i class="fas fa-chart-bar"></i>
+        Grades
+    </div>
+</a>
+    <!--
+    <div class="nav-item">
+        <i class="fas fa-cog"></i>
+        Settings
+    </div>-->
+</nav>
+{%- endmacro %}

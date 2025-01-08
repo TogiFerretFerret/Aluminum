@@ -1,12 +1,12 @@
-import authwrapper
-import apiwrapper
+import bromine.authwrapper as authwrapper
+import bromine.apiwrapper as apiwrapper
 import base64
-from flask import Flask, request
+from flask import Flask, request, redirect
 from waitress import serve
 import multiprocessing
 import os
 import signal
-import CONFIG
+import bromine.CONFIG as CONFIG
 
 def finish_auth(oauth_url):
         """
@@ -36,7 +36,7 @@ def seturl():
     oauth_url = base64.b64decode(request.args.get('url')).decode("utf-8")
     shutdown_server()
     finish_auth(oauth_url=oauth_url)
-    return "You may now leave this page and return to the client."
+    return redirect(CONFIG.lms_url)
 def shutdown_server():
     """
     Shuts down the server by sending a SIGINT signal to the current process.

@@ -1,6 +1,6 @@
-import googleauth
-import apiwrapper
-import authwrapper
+import bromine.googleauth as googleauth
+import bromine.apiwrapper as apiwrapper
+import bromine.authwrapper as authwrapper
 print(googleauth.goog_murl("hudsonreich"))
 das=googleauth.goog_megaauth()
 v=authwrapper.BbAuthWrapper("hudsonreich")

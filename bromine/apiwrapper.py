@@ -1,5 +1,5 @@
 import requests
-
+import datetime
 class BbApiWrapper:
     """
     A wrapper class for interacting with the Bb API.
@@ -39,9 +39,9 @@ class BbApiWrapper:
             classes: Initialized to None, can be used to store class information.
         """
         self.tt = tt
-        self.userdata = None
-        self.uid = None
         self.rawresult = self.get_rawdata()
+        self.userdata = None
+        self.uid = self.get_uid()
         self.classes=None
     def get_rawdata(self):
         """
@@ -79,6 +79,10 @@ class BbApiWrapper:
         """
         self.tt = tt
         return self.tt # Why not?
+    def get_class(self,sid):
+        url=f"https://hunterschools.myschoolapp.com/api/datadirect/SectionInfoView/?format=json&sectionId={sid}&associationId=1"
+        headers={"cookie": f"t={self.tt}", "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"}
+        return requests.get(url,headers=headers).json()
     def get_classes(self):
         """
         Retrieves and processes class groups from the raw result data.
@@ -97,10 +101,48 @@ class BbApiWrapper:
             if group['Category'] not in ["External Program", "Academic Department Groups","","School Wide","Faculty & Staff"]:
                 if group['LeadSectionId'] not in [lsid['LeadSectionId'] for lsid in self.classes]:
                     self.classes.append(group)
-        topop=['SectionBlock','SchoolYear','LeadSectionId','CurrentSectionId','Association','OfferingId','PublishGroupToUser','CurrentEnrollment']
+        topop=['SectionBlock','SchoolYear','CurrentSectionId','Association','OfferingId','PublishGroupToUser','CurrentEnrollment']
         for cl in self.classes:
             for popper in topop:
                 if popper in cl:
                     cl.pop(popper)
+            axl=self.get_class(cl['SectionId'])
+            cl['OfferingId']=axl[0]['OfferingId']
+            # Parse the time
+            stimestring=axl[0]['StartDate'].split(" ")[0].split("/")
+            etimestring=axl[0]['EndDate'].split(" ")[0].split("/")
+            if len(axl)==2:
+                etimestring=axl[1]['EndDate'].split(" ")[0].split("/")
+            # Parse the strings in format month/day/YYYY IGNORE
+            stime=datetime.date(int(stimestring[2]),int(stimestring[0]),int(stimestring[1]))
+            etime=datetime.date(int(etimestring[2]),int(etimestring[0]),int(etimestring[1]))
+            ttime=etime-stime
+            passedtime=datetime.date.today()-stime
+            # Progress is the percentage of time passed. If 50%, then 50 is returned.
+            cl['Progress']=int((passedtime/ttime)*100)
+            if (cl['Progress']<0):
+                cl['Progress']=0
+            cl['Description']=axl[0]['Description']
+
         return self.classes
-                
+    def get_assignments(self, lsid):
+        """
+        Retrieves and returns a list of assignments for a given lead section ID.
+
+        Args:
+            lsid: The lead section ID for which to retrieve assignments.
+
+        Returns:
+            list: A list of dictionaries, each representing an assignment.
+        """
+        url = f"https://hunterschools.myschoolapp.com/api/assignment/forsection/{lsid}/?format=json&dateSort=0&personaId=2"
+        headers={"cookie": f"t={self.tt}", "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"}
+        response = requests.get(url, headers=headers)
+        return response.json()
+    def get_headers(self):
+        headers={"cookie": f"t={self.tt}", "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"}
+        return headers
+    def get_assignment(self, aii):
+        url=f"https://hunterschools.myschoolapp.com/api/assignment2/UserAssignmentDetailsGetAllStudentData?assignmentIndexId={aii}&studentUserId={self.uid}&personaId=2"
+        headers=self.get_headers()
+        return requests.get(url,headers=headers).json()

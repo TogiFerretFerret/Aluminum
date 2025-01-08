@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aluminum LMS</title>
+    <!--favicon-->
+    <link rel="icon" href="static/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+    {% from 'sidebar.html' import sidebar as sidebar %}
+    {{sidebar()}}
+    <main class="main-content">
+        <h2>My Courses</h2><br>
+        <div class="course-grid">
+            {% for class in classes %}
+            <div class="course-card">
+                <div class="course-image">
+                    {% if class.Category=="Art & Music" %}
+                    <i class="fas fa-paintbrush fa-3x"></i>
+                    {% elif class.Category == "English/Communication and Theatre" %}
+                    <i class="fas fa-book-open fa-3x"></i>
+                    {% elif class.Category == "Social Studies" %}
+                    <i class="fas fa-globe fa-3x"></i>
+                    {% elif class.Category == "Science" %}
+                    <i class="fas fa-flask fa-3x"></i>
+                    {% elif class.Category == "Mathematics" %}
+                    <i class="fas fa-calculator fa-3x"></i>
+                    {% elif class.Category == "Modern and Classical Languages" %}
+                    <i class="fas fa-language fa-3x"></i>
+                    {% elif class.Category == "Health/Physical Education" %}
+                    <i class="fas fa-heart fa-3x"></i>
+                    {% else %}
+                    <i class="fas fa-bell fa-3x"></i>
+                    {% endif %}
+                    
+                </div>
+                <div class="course-content">
+                    <h3 class="course-title">{{ class.GroupName }}</h3>
+                    <p class="course-info">{{ class.Category }}</p>
+                    <div class="course-details">
+                        <span>Teacher: {{ class.OwnerName }}</span>
+                        <span>Section ID: {{ class.LeadSectionId }}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: {{ class.Progress }}%;"></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>
