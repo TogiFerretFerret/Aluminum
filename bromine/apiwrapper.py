@@ -151,3 +151,13 @@ class BbApiWrapper:
             te['OverallGrade']=grade
             te['IsGraded']=True
         return te
+    def update_assstatus(self, aii, state):
+        #mapd={"Overdue": 2,"To Do": -1,"Not Started": -1, "In progress": 0,"Completed": 1,"Graded": 4,}
+        url="https://hunterschools.myschoolapp.com/api/assignment2/assignmentstatusupdate"
+        headers=self.get_headers()
+        #"content-type": "application/json", "origin": "https://app.blackbaud.com", 
+        headers['content-type']="application/json"
+        headers['origin']="https://hunterschools.myschoolapp.com"
+        headers['Requestverificationtoken']="8UvM_BHi1RFAD-EfEp3l6bAcXuSykbHmcqJ7YcNDdXeNmM33PALccdMRlX29Vd7UmEvN-Fz8aqhPVqKrfk0WG1W9gCC70Wm3oPXyyRj8FrI1"
+        body={"assignmentIndexId": aii,"assignmentStatus": state}
+        return requests.post(url,headers=headers,json=body)

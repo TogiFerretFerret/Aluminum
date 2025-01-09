@@ -2,10 +2,10 @@
 <div class="assignments-container">
     <!-- Tab Navigation -->
     <div class="assignment-tabs">
-        <button class="tab-btn active" data-tab="past">
+        <button class="tab-btn" data-tab="past">
             <i class="fas fa-history"></i> Past
         </button>
-        <button class="tab-btn" data-tab="present">
+        <button class="tab-btn active" data-tab="present">
             <i class="fas fa-clock"></i> Current
         </button>
         <button class="tab-btn" data-tab="future">
@@ -13,7 +13,7 @@
         </button>
     </div>
     <!-- Past Assignments Section -->
-    <div id="past" class="assignments-section active">
+    <div id="past" class="assignments-section">
         <h3><i class="fas fa-history"></i> Past Assignments</h3>
         {% for assignment in apdata.past %}
         <div class="assignment-card">
@@ -34,11 +34,12 @@
                     {% if assignment.AssignmentStatus==4 %}
                     <span class="status completed"><i class="fas fa-check-circle"></i> Graded</span>
                     {% elif assignment.AssignmentStatus==2 %}
-                    <span class="status completed"><i class="fas fa-check-circle"></i> Completed</span>
+                    <span class="status overdue"><i class="fas fa-circle-exclamation"></i> Overdue</span>
                     {% elif assignment.AssignmentStatus==1 %}
                     <span class="status completed"><i class="fas fa-check-circle"></i> Completed</span>
+                    {% elif assignment.AssignmentStatus==0 %}
+                    <span class="status pending"><i class="fas fa-hourglass-half"></i> In Progress</span>
                     {% endif %}
-                    <span class="status completed"><i class="fas fa-check-circle"></i> {{assignment.AssignmentStatus}}|{{assignment.HasGrade}}</span>
                 </div>
             </div>
         </div>
@@ -46,7 +47,7 @@
     </div>
 
     <!-- Current Assignments Section -->
-    <div id="present" class="assignments-section">
+    <div id="present" class="assignments-section active">
         <h3><i class="fas fa-clock"></i> Current Assignments</h3>
         {% for assignment in apdata.present %}
         <div class="assignment-card active">
@@ -64,7 +65,57 @@
                 {% endif %}
                 <div class="assignment-meta">
                     <span><i class="fas fa-calendar"></i> Due: {{ assignment.DueDate }}</span>
-                    <span class="status pending"><i class="fas fa-hourglass-half"></i> In Progress</span>
+                    {% if assignment.AssignmentStatus==4 %}
+                    <span class="status completed" onclick="changeStatus({{assignment.AssignmentIndexId}}, 4)"><i class="fas fa-check-circle"></i> Graded</span>
+                    {% elif assignment.AssignmentStatus==2 %}
+                    <span class="status overdue" onclick="changeStatus({{assignment.AssignmentIndexId}}, 2)"><i class="fas fa-circle-exclamation"></i> Overdue</span>
+                    {% elif assignment.AssignmentStatus==1 %}
+                    <span class="status completed" onclick="changeStatus({{assignment.AssignmentIndexId}}, 1)"><i class="fas fa-check-circle"></i> Completed</span>
+                    {% elif assignment.AssignmentStatus==0 %}
+                    <span class="status pending" onclick="changeStatus({{assignment.AssignmentIndexId}}, 0)"><i class="fas fa-hourglass-half"></i> In Progress</span>
+                    {% elif assignment.AssignmentStatus==-1 %}
+                    <span class="status upcoming" onclick="changeStatus({{assignment.AssignmentIndexId}}, -1)"><i class="fas fa-circle-plus"></i> To Do</span>
+                    {% endif %}
+<script>
+    function changeStatus(assignmentId, currentStatus) {
+        // Define the new status based on the current status
+        let newStatus;
+        switch (currentStatus) {
+            case 4:
+                newStatus = 0; // Change to In Progress
+                break;
+            case 2:
+                newStatus = 1; // Change to Completed
+                break;
+            case 1:
+                newStatus = -1; // Change to To Do
+                break;
+            case 0:
+                newStatus = 4; // Change to Graded
+                break;
+            case -1:
+                newStatus = 0; // Change to Overdue
+                break;
+        }
+
+        // Call the Python function to update the status
+        fetch(`/update_assignment_status/${assignmentId}/${newStatus}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (response.ok) {
+                // Reload the page to reflect the changes
+                location.reload();
+            } else {
+                console.error('Failed to update status');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+        });
+    }
+</script>
                 </div>
             </div>
         </div>
@@ -90,7 +141,17 @@
                 {% endif %}
                 <div class="assignment-meta">
                     <span><i class="fas fa-calendar"></i> Due: {{ assignment.DueDate }}</span>
+                    {% if assignment.AssignmentStatus==4 %}
+                    <span class="status completed"><i class="fas fa-check-circle"></i> Graded</span>
+                    {% elif assignment.AssignmentStatus==2 %}
+                    <span class="status overdue"><i class="fas fa-circle-exclamation"></i> Overdue</span>
+                    {% elif assignment.AssignmentStatus==1 %}
+                    <span class="status completed"><i class="fas fa-check-circle"></i> Completed</span>
+                    {% elif assignment.AssignmentStatus==0 %}
+                    <span class="status pending"><i class="fas fa-hourglass-half"></i> In Progress</span>
+                    {% elif assignment.AssignmentStatus==-1 %}
                     <span class="status upcoming"><i class="fas fa-clock"></i> Not Started</span>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -199,6 +260,7 @@
     color: #666;
     font-size: 0.9rem;
     margin: 0.5rem 0;
+    padding-left:20px;
 }
 
 .assignment-meta {
@@ -221,11 +283,15 @@
 }
 
 .status.pending {
-    color: var(--primary-color);
+    color: #ffc107;
 }
 
 .status.upcoming {
-    color: #ffc107;
+    color: #06b8ff;
+}
+
+.status.overdue {
+    color: #ff0000;
 }
 </style>
 <script>

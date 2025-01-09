@@ -106,5 +106,9 @@ def logout():
     global authz
     authz = None
     return redirect("/")
+@app.route('/update_assignment_status/<id>/<status>', methods=['POST'])
+def update_assignment_status(id, status):
+    api = init_api(name)
+    return api.update_assstatus(id, status).json()
 if __name__ == '__main__':
     app.run(debug=True,port=5050)
