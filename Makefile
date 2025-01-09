@@ -5,8 +5,8 @@ brom:
 install:
 	npm install && cd Ultraviolet-Static && npm install && cd .. && npm install ./Ultraviolet-Static && pip3 install -r requirements.txt
 uvkill:
-	fuser -k 8080/tcp
+	lsof -ti:8080 | xargs kill -9 2>/dev/null || true
 ckill:
-	fuser -k 5050/tcp
+	lsof -ti:5050 | xargs kill -9 2>/dev/null || true
 bkill:
-	fuser -k 5000/tcp
+	lsof -ti:5420 | xargs kill -9 2>/dev/null || true

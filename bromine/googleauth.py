@@ -7,7 +7,7 @@ import multiprocessing
 import os
 import signal
 import bromine.CONFIG as CONFIG
-
+PORT=5420
 def finish_auth(oauth_url):
         """
         Writes the provided OAuth URL to a temporary file.
@@ -62,7 +62,7 @@ def run_server():
     Returns:
         None
     """
-    serve(app, host='0.0.0.0', port=5000)
+    serve(app, host='0.0.0.0', port=PORT)
 def goog_murl(uid):
     """
     Generates a Google OAuth URL for the given user ID.

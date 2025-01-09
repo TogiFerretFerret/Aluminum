@@ -146,7 +146,8 @@ class BbApiWrapper:
         url=f"https://hunterschools.myschoolapp.com/api/assignment2/UserAssignmentDetailsGetAllStudentData?assignmentIndexId={aii}&studentUserId={self.uid}&personaId=2"
         headers=self.get_headers()
         te=requests.get(url,headers=headers).json()
-        if te['HasGrade']:
+        print(te)
+        if te['PublishGrade'] and te['AssignmentGrade'] and 'GradebookGrade' in te['AssignmentGrade'].keys():
             grade=(te['AssignmentGrade']['GradebookGrade']/te['MaxPoints'])*100
             te['OverallGrade']=grade
             te['IsGraded']=True
@@ -157,7 +158,6 @@ class BbApiWrapper:
         headers=self.get_headers()
         #"content-type": "application/json", "origin": "https://app.blackbaud.com", 
         headers['content-type']="application/json"
-        headers['origin']="https://hunterschools.myschoolapp.com"
-        headers['Requestverificationtoken']="8UvM_BHi1RFAD-EfEp3l6bAcXuSykbHmcqJ7YcNDdXeNmM33PALccdMRlX29Vd7UmEvN-Fz8aqhPVqKrfk0WG1W9gCC70Wm3oPXyyRj8FrI1"
+        headers['referer']="https://hunterschools.myschoolapp.com/lms-assignment/assignment-center/student"
         body={"assignmentIndexId": aii,"assignmentStatus": state}
         return requests.post(url,headers=headers,json=body)
