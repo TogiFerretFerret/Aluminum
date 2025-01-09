@@ -16,6 +16,7 @@
         <h2>My Courses</h2><br>
         <div class="course-grid">
             {% for class in classes %}
+            <a href="/class/{{class.LeadSectionId}}" class="nav-link">
             <div class="course-card">
                 <div class="course-image">
                     {% if class.Category=="Art & Music" %}
@@ -48,7 +49,7 @@
                         <div class="progress" style="width: {{ class.Progress }}%;"></div>
                     </div>
                 </div>
-            </div>
+            </div></a>
             {% endfor %}
         </div>
     </main>

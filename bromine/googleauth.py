@@ -101,7 +101,7 @@ def goog_megaauth():
         with open("tmp.txt", "r") as f:
             oauth_url = f.read()
     import time
-    time.sleep(0.1) # Time to return
+    time.sleep(0.2) # Time to return
     server_process.terminate()
     # After the user logs in, you can use the oauth_url variable
     return oauth_url

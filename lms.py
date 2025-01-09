@@ -5,8 +5,9 @@ from flask import Flask, render_template, redirect, send_from_directory
 import time # THIS IS FUCKING JANK. I'M SORRY.
 import json
 import threading 
-name="hudsonreich"
-authz = authwrapper.BbAuthWrapper(name)
+name=""
+authz = None
+ac=None
 app = Flask(__name__)
 def init_api(username):
     authz.get_bearer_token()
@@ -14,21 +15,42 @@ def init_api(username):
     print(tt)
     return apiwrapper.BbApiWrapper(tt)
 def run_server():
-    auth_code = googleauth.goog_megaauth()
-    authz.goog_code(auth_code)
-    authz.get_authsvctoken()
+    global ac
+    ac = googleauth.goog_megaauth()
 @app.route('/')
 def index():
-    if authz.asvc is not None:
-        api = init_api(name)
-        classes = api.get_classes()
-        return render_template("lms.html", classes=classes)
-    else:
-        time.sleep(0.1)
+    time.sleep(0.2)
+    if authz is not None:
+        authz.goog_code(ac)
+        authz.get_authsvctoken()
+    if authz is not None:
         if authz.asvc is not None:
             api = init_api(name)
             classes = api.get_classes()
             return render_template("lms.html", classes=classes)
+        else:
+            time.sleep(0.1)
+            if authz.asvc is not None:
+                api = init_api(name)
+                classes = api.get_classes()
+                return render_template("lms.html", classes=classes)
+            else:
+                return redirect("/auth")
+    else:
+        time.sleep(0.1)
+        if authz is not None:
+            if authz.asvc is not None:
+                api = init_api(name)
+                classes = api.get_classes()
+                return render_template("lms.html", classes=classes)
+            else:
+                time.sleep(0.1)
+                if authz.asvc is not None:
+                    api = init_api(name)
+                    classes = api.get_classes()
+                    return render_template("lms.html", classes=classes)
+                else:
+                    return redirect("/auth")
         else:
             return redirect("/auth")
 @app.route('/grades')
@@ -47,15 +69,42 @@ def grades():
         return render_template("grades.html", uid=uid, classes=classes,data=data)
     else:
         return redirect("/")
+@app.route('/class/<id>')
+def classd(id):
+    if authz.asvc is not None:
+        api = init_api(name)
+        classds=api.get_class(id)
+        if len(classds)==2:
+            for c in classds:
+                if c['Current']==1:
+                    classds=c
+        else:
+            classds=classds[0]
+        classd={}
+        assp={"past":api.get_assignments(id,0),"present":api.get_assignments(id,1),"future":api.get_assignments(id,2)}
+        return render_template("class.html", classd=classd, classds=classds, assp=assp)
+    else:
+        return redirect("/")
 @app.route('/auth')
 def auth():
     # Create a new thread to run the server
     server_thread = threading.Thread(target=run_server)
     server_thread.start()
+    return render_template("auth.html")
+@app.route('/oauth/<namez>')
+def auth_name(namez):
+    global authz, name
+    name = namez
+    authz = authwrapper.BbAuthWrapper(name)
     return redirect(googleauth.goog_murl(name))
 @app.route('/static/<path:path>')
 def send_report(path):
     # Using request args for path will expose you to directory traversal attacks
     return send_from_directory('static', path)
+@app.route('/logout')
+def logout():
+    global authz
+    authz = None
+    return redirect("/")
 if __name__ == '__main__':
     app.run(debug=True,port=5050)

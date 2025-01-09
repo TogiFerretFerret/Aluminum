@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aluminum LMS | Authentication</title>
+    <!--favicon-->
+    <link rel="icon" href="static/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="static/styles.css">
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.main-content {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.auth-form {
+    text-align: center;
+}
+
+.auth-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
+    </style>
+    <script>
+        function mySubmitFunction(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            if (username) {
+                window.location.href = `/oauth/${username}`;
+                return true;
+            }
+            return false;
+        }
+    </script>
+</head>
+<body>
+    <main class="main-content">
+        <div class="auth-form">
+            <h2 class="auth-title">Login</h2>
+            <form onsubmit="return mySubmitFunction(event)">
+                <div class="input-group">
+                    <label for="username">Username (e.g., if email is johndoe@hunterschools.org, username is johndoe)</label>
+                    <input type="text" name="username" id="username" required>
+                </div>
+                <button type="submit" class="btn">Login</button>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

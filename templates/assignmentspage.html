@@ -1,0 +1,244 @@
+{% macro assignmentspage(apdata) -%}
+<div class="assignments-container">
+    <!-- Tab Navigation -->
+    <div class="assignment-tabs">
+        <button class="tab-btn active" data-tab="past">
+            <i class="fas fa-history"></i> Past
+        </button>
+        <button class="tab-btn" data-tab="present">
+            <i class="fas fa-clock"></i> Current
+        </button>
+        <button class="tab-btn" data-tab="future">
+            <i class="fas fa-calendar-alt"></i> Upcoming
+        </button>
+    </div>
+    <!-- Past Assignments Section -->
+    <div id="past" class="assignments-section active">
+        <h3><i class="fas fa-history"></i> Past Assignments</h3>
+        {% for assignment in apdata.past %}
+        <div class="assignment-card">
+            <div class="assignment-header">
+                <h4>{{ assignment.AssignmentDescription | safe }}</h4>
+                <span class="assignment-type {% if assignment.Major %}major{% endif %}">
+                    {{ assignment.AssignmentType }}
+                </span>
+            </div>
+            <div class="assignment-content">
+                {% if assignment.AssignmentLongDescription %}
+                <div class="assignment-description">
+                    {{ assignment.AssignmentLongDescription | safe }}
+                </div>
+                {% endif %}
+                <div class="assignment-meta">
+                    <span><i class="fas fa-calendar"></i> Due: {{ assignment.DueDate }}</span>
+                    {% if assignment.AssignmentStatus==4 %}
+                    <span class="status completed"><i class="fas fa-check-circle"></i> Graded</span>
+                    {% elif assignment.AssignmentStatus==2 %}
+                    <span class="status completed"><i class="fas fa-check-circle"></i> Completed</span>
+                    {% elif assignment.AssignmentStatus==1 %}
+                    <span class="status completed"><i class="fas fa-check-circle"></i> Completed</span>
+                    {% endif %}
+                    <span class="status completed"><i class="fas fa-check-circle"></i> {{assignment.AssignmentStatus}}|{{assignment.HasGrade}}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Current Assignments Section -->
+    <div id="present" class="assignments-section">
+        <h3><i class="fas fa-clock"></i> Current Assignments</h3>
+        {% for assignment in apdata.present %}
+        <div class="assignment-card active">
+            <div class="assignment-header">
+                <h4>{{ assignment.AssignmentDescription | safe }}</h4>
+                <span class="assignment-type {% if assignment.Major %}major{% endif %}">
+                    {{ assignment.AssignmentType }}
+                </span>
+            </div>
+            <div class="assignment-content">
+                {% if assignment.AssignmentLongDescription %}
+                <div class="assignment-description">
+                    {{ assignment.AssignmentLongDescription | safe }}
+                </div>
+                {% endif %}
+                <div class="assignment-meta">
+                    <span><i class="fas fa-calendar"></i> Due: {{ assignment.DueDate }}</span>
+                    <span class="status pending"><i class="fas fa-hourglass-half"></i> In Progress</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Future Assignments Section -->
+    <div id="future" class="assignments-section">
+        <h3><i class="fas fa-calendar-alt"></i> Upcoming Assignments</h3>
+        {% for assignment in apdata.future %}
+        <div class="assignment-card">
+            <div class="assignment-header">
+                <h4>{{ assignment.AssignmentDescription | safe }}</h4>
+                <span class="assignment-type {% if assignment.Major %}major{% endif %}">
+                    {{ assignment.AssignmentType }}
+                </span>
+            </div>
+            <div class="assignment-content">
+                {% if assignment.AssignmentLongDescription %}
+                <div class="assignment-description">
+                    {{ assignment.AssignmentLongDescription | safe }}
+                </div>
+                {% endif %}
+                <div class="assignment-meta">
+                    <span><i class="fas fa-calendar"></i> Due: {{ assignment.DueDate }}</span>
+                    <span class="status upcoming"><i class="fas fa-clock"></i> Not Started</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .assignment-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab-btn {
+            background: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #666;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .assignments-section {
+            display: none;
+        }
+
+        .assignments-section.active {
+            display: block;
+        }
+.assignments-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.assignments-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.assignments-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.assignment-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid #ddd;
+}
+
+.assignment-card.active {
+    border-left: 4px solid var(--primary-color);
+}
+
+.assignment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.assignment-header h4 {
+    margin: 0;
+    flex: 1;
+}
+
+.assignment-type {
+    background: #eee;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    margin-left: 1rem;
+}
+
+.assignment-type.major {
+    background: var(--primary-color);
+    color: white;
+}
+
+.assignment-description {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+}
+
+.assignment-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status.completed {
+    color: #28a745;
+}
+
+.status.pending {
+    color: var(--primary-color);
+}
+
+.status.upcoming {
+    color: #ffc107;
+}
+</style>
+<script>
+    document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and sections
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.assignments-section').forEach(s => s.classList.remove('active'));
+                
+                // Add active class to clicked button and corresponding section
+                button.classList.add('active');
+                document.getElementById(button.dataset.tab).classList.add('active');
+            });
+        });
+</script>
+{%- endmacro %}

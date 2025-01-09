@@ -4,8 +4,53 @@
     <div class="header-actions">
         <i class="fas fa-search"></i>
         <i class="fas fa-bell"></i>
-        <i class="fas fa-user-circle"></i>
+        <div class="user-dropdown">
+            <div class="dropdown-content">
+                <a href="/logout">Logout</a>
+            </div>
+            <i class="fas fa-user-circle"></i>
+        </div>
     </div>
+
+    <style>
+        .user-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            left: -160px; 
+        }
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .user-dropdown.active .dropdown-content {
+            display: block;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var userDropdown = document.querySelector('.user-dropdown');
+            userDropdown.addEventListener('click', function() {
+                this.classList.toggle('active');
+            });
+        });
+    </script>
 </header>
 
 <nav class="sidebar">
@@ -13,32 +58,16 @@
     <div class="nav-item">
     <i class="fas fa-home"></i>
     Dashboard
-    </div></a><!--
-    <div class="nav-item">
-        <i class="fas fa-book"></i>
-        Courses
-    </div>
-    -->
+    </div></a>
     <a href="/calendar" class="nav-link">
     <div class="nav-item">
         <i class="fas fa-calendar"></i>
         Calendar
     </div></a>
-    <!--
-    <div class="nav-item">
-        <i class="fas fa-inbox"></i>
-        Messages
-    </div>-->
     <a href="/grades" class="nav-link">
     <div class="nav-item">
         <i class="fas fa-chart-bar"></i>
         Grades
-    </div>
-</a>
-    <!--
-    <div class="nav-item">
-        <i class="fas fa-cog"></i>
-        Settings
-    </div>-->
+    </div></a>
 </nav>
 {%- endmacro %}

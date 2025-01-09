@@ -125,7 +125,7 @@ class BbApiWrapper:
             cl['Description']=axl[0]['Description']
 
         return self.classes
-    def get_assignments(self, lsid):
+    def get_assignments(self, lsid,dsort):
         """
         Retrieves and returns a list of assignments for a given lead section ID.
 
@@ -135,7 +135,7 @@ class BbApiWrapper:
         Returns:
             list: A list of dictionaries, each representing an assignment.
         """
-        url = f"https://hunterschools.myschoolapp.com/api/assignment/forsection/{lsid}/?format=json&dateSort=0&personaId=2"
+        url = f"https://hunterschools.myschoolapp.com/api/assignment/forsection/{lsid}/?format=json&dateSort={dsort}&personaId=2"
         headers={"cookie": f"t={self.tt}", "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"}
         response = requests.get(url, headers=headers)
         return response.json()
@@ -145,4 +145,9 @@ class BbApiWrapper:
     def get_assignment(self, aii):
         url=f"https://hunterschools.myschoolapp.com/api/assignment2/UserAssignmentDetailsGetAllStudentData?assignmentIndexId={aii}&studentUserId={self.uid}&personaId=2"
         headers=self.get_headers()
-        return requests.get(url,headers=headers).json()
+        te=requests.get(url,headers=headers).json()
+        if te['HasGrade']:
+            grade=(te['AssignmentGrade']['GradebookGrade']/te['MaxPoints'])*100
+            te['OverallGrade']=grade
+            te['IsGraded']=True
+        return te
