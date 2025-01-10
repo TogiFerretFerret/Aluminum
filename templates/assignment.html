@@ -26,170 +26,157 @@
 <body>
     {% from 'sidebar.html' import sidebar as sidebar %}
     {{sidebar()}}
-    <main class="main-content">
-        <a href="/class/{{classds.LeadSectionId}}" id="verybackbutton" class="back-button"><i class="fa fa-arrow-left"></i></a>
+    <main class="container">
+        <div class="assignment-card">
+            <a href="/class/{{classds.LeadSectionId}}" id="verybackbutton" class="back-button"><i style="color:white;" class="fa fa-arrow-left"></i></a>
         <script>
             document.getElementById('verybackbutton').setAttribute('href', '/class/{{classds.LeadSectionId}}'+window.location.hash);
         </script>
-        <div style="padding-bottom:10px;"></div>
-        <div class="course-header">
-            <div class="course-title-section">
-                <h2>{{classds.GroupName}}</h2>
-                <p class="course-meta">{{classds.Duration}} | Room: {{classds.Room if classds.Room else 'TBD'}} | Block: {{classds.Block if classds.Block else 'TBD'}}</p>
-                
-            </div>
-            
-            <div class="course-info-grid">
-                <div class="info-card">
-                    <i class="fas fa-user-tie"></i>
-                    <h3>Teacher</h3>
-                    <p>{{classds.Teacher}}</p>
-                </div>
-                
-                <div class="info-card">
-                    <i class="fas fa-calendar"></i>
-                    <h3>Schedule</h3>
-                    <p>{{classds.StartDate.split(' ')[0]}} - {{classds.EndDate.split(' ')[0]}}</p>
-                </div>
-
-                <div class="info-card">
-                    <i class="fas fa-graduation-cap"></i>
-                    <h3>Level</h3>
-                    <p>{{classds.Level}}</p>
-                </div>
-
-                <div class="info-card">
-                    <i class="fas fa-info-circle"></i>
-                    <h3>Course ID</h3>
-                    <p>{{classds.Id}}</p>
+            <div class="assignment-header">
+                <h1>{{assignment.ShortDescription | safe}}</h1>
+                <div class="assignment-meta">
+                    <span class="badge">{{assignment.AssignmentType}}</span>
+                    <span class="points">Max {{assignment.MaxPoints}} points</span>
+                    <!--if its graded, say graded -->
+                    {% if assignment.IsGraded %}
+                    <span class="badge" style="background-color: #28a745;color:white;">Graded: {{assignment.AssignmentGrade.GradebookGrade}}/{{assignment.MaxPoints}}</span>
+                    {% endif %}
                 </div>
             </div>
 
-            <div class="course-description">
-                <h3>Course Description</h3>
+            <div class="dates-section">
+                <div class="date-item">
+                    <i class="fas fa-calendar-plus"></i>
+                    <span>Assigned: {{assignment.AssignmentDate}}</span>
+                </div>
+                <div class="date-item">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Due: {{assignment.DueDate}}</span>
+                </div>
+            </div>
+
+            <div class="description-section">
+                <h2>Description</h2>
                 <div class="description-content">
-                    {{classds.Description | safe}}
+                    {{assignment.LongDescription | safe}}
+                    {{assignment}}
                 </div>
             </div>
-        </div>
-        <div class="course-description">
-            <h3>Course Description</h3>
-            <div class="description-content">
-                {{classds.Description | safe}}
+
+            {% if assignment.DropboxInd %}
+            <div class="submission-section">
+                <h2>Submission</h2>
+                <p><i class="fas fa-upload"></i> Submit up to {{assignment.DropboxNumFiles}} file(s)</p>
+                {% if assignment.SubmissionResults %}
+                <div class="submitted-work">
+                    <h3>Your Submission</h3>
+                    {% for submission in assignment.SubmissionResults %}
+                    <div class="submission-item">
+                        <i class="fas fa-file-alt"></i>
+                        <a href="/getfile/{{submission.DownloadUrl}}">{{submission.FileName}}</a>
+                        <span class="submission-date">Submitted: {{submission.LastSubmitDate}}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
+            {% endif %}
         </div>
     </main>
 
     <style>
-        .course-header {
-            background: white;
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
             padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .course-title-section {
-            margin-bottom: 2rem;
+        .assignment-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 2rem;
         }
 
-        .course-meta {
-            color: #666;
+        .assignment-header {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .assignment-meta {
+            display: flex;
+            gap: 1rem;
             margin-top: 0.5rem;
         }
 
-        .course-info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+        .badge {
+            background: #e9ecef;
+            padding: 0.25rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.9rem;
         }
 
-        .info-card {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 8px;
-            text-align: center;
+        .dates-section {
+            display: flex;
+            gap: 2rem;
+            margin: 1.5rem 0;
         }
 
-        .info-card i {
-            font-size: 2rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
+        .date-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .info-card h3 {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .info-card p {
-            color: #666;
-        }
-
-        .course-description {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 8px;
-        }
-
-        .course-description h3 {
-            margin-bottom: 1rem;
+        .description-section,
+        .submission-section {
+            margin-top: 2rem;
         }
 
         .description-content {
-            color: #666;
             line-height: 1.6;
         }
-        .course-tabs {
-        display: flex;
-        gap: 1rem;
-        margin: 2rem 0;
-        border-bottom: 2px solid #eee;
-        padding-bottom: 0.5rem;
-    }
 
-    .tab-button {
-        background: none;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        cursor: pointer;
-        font-size: 1rem;
-        color: #666;
-        border-radius: 8px 8px 0 0;
-        transition: all 0.3s ease;
-    }
+        .submission-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
 
-    .tab-button:hover {
-        background: #f0f0f0;
-    }
+        .submission-date {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-left: auto;
+        }
 
-    .tab-button.active {
-        color: var(--primary-color);
-        border-bottom: 2px solid var(--primary-color);
-    }
+        i {
+            color: #6c757d;
+        }
 
-    .tab-button i {
-        margin-right: 0.5rem;
-    }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
 
-    .tab-content {
-        margin-top: 1rem;
-    }
+        a:hover {
+            text-decoration: underline;
+        }
 
-    .tab-pane {
-        display: none;
-    }
-
-    .tab-pane.active {
-        display: block;
-    }
-
-    .content-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
+        @media (max-width: 600px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .dates-section {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
     </style>
 </body>
 </html>

@@ -125,5 +125,9 @@ def update_assignment_status(id, status):
     api = init_api(name)
     print(api.get_assignment(id))
     return api.update_assstatus(id, status).json()
+@app.route('/getfile/<path:path>')
+def getfile(path):
+    api = init_api(name)
+    return api.get_file(path).content
 if __name__ == '__main__':
     app.run(debug=True,port=5050)
