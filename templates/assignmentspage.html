@@ -43,7 +43,7 @@
 <select id="status-{{assignment.AssignmentIndexId}}" {% if assignment.AssignmentStatus==4 %}disabled{% endif %} onchange="changeStatus({{ assignment.AssignmentIndexId }})">
 	<option {% if assignment.AssignmentStatus==1 %} selected {% endif %} value="1">Completed</option>
 	<option {% if assignment.AssignmentStatus==0 %} selected {% endif %} value="0">In Progress</option>
-	<option {% if assignment.AssignmentStatus==-1 %} selected {% endif %} value="-1">Overdue</option>
+	<option {% if assignment.AssignmentStatus==2 %} selected {% endif %} value="2">Overdue</option>
 </select>
 <script>
 	function cStatus() {
