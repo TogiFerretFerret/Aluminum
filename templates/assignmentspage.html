@@ -1,20 +1,20 @@
-{% macro assignmentspage(apdata) -%}
+{% macro assignmentspage(apdata) -%}<br>
 <div class="assignments-container">
     <!-- Tab Navigation -->
     <div class="assignment-tabs">
-        <button class="tab-btn" data-tab="past">
+        <button class="tab-btn" id="ast" data-tab="past">
             <i class="fas fa-history"></i> Past
         </button>
-        <button class="tab-btn active" data-tab="present">
+        <button class="tab-btn active" id="resent" data-tab="present">
             <i class="fas fa-clock"></i> Current
         </button>
-        <button class="tab-btn" data-tab="future">
+        <button class="tab-btn" id="uture" data-tab="future">
             <i class="fas fa-calendar-alt"></i> Upcoming
         </button>
-    </div>
+	</div>
     <!-- Past Assignments Section -->
     <div id="past" class="assignments-section">
-        <h3><i class="fas fa-history"></i> Past Assignments</h3>
+		<h3><i class="fas fa-history"></i> Past Assignments</h3>
         {% for assignment in apdata.past %}
         <div class="assignment-card">
             <div class="assignment-header">
@@ -40,6 +40,35 @@
                     {% elif assignment.AssignmentStatus==0 %}
                     <span class="status pending"><i class="fas fa-hourglass-half"></i> In Progress</span>
                     {% endif %}
+<select id="status-{{assignment.AssignmentIndexId}}" {% if assignment.AssignmentStatus==4 %}disabled{% endif %} onchange="changeStatus({{ assignment.AssignmentIndexId }})">
+	<option {% if assignment.AssignmentStatus==1 %} selected {% endif %} value="1">Completed</option>
+	<option {% if assignment.AssignmentStatus==0 %} selected {% endif %} value="0">In Progress</option>
+	<option {% if assignment.AssignmentStatus==-1 %} selected {% endif %} value="-1">Overdue</option>
+</select>
+<script>
+	function cStatus() {
+	}
+    function changeStatus(assignmentId) {
+		var currentStatus = document.getElementById('status-' + assignmentId).value;
+        // Define the new status based on the current status
+        fetch(`/update_assignment_status/${assignmentId}/${currentStatus}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (response.ok) {
+                // Reload the page to reflect the changes
+                location.reload();
+            } else {
+                console.error('Failed to update status');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+        });
+    }
+</script>
+
                 </div>
             </div>
         </div>
@@ -66,40 +95,29 @@
                 <div class="assignment-meta">
                     <span><i class="fas fa-calendar"></i> Due: {{ assignment.DueDate }}</span>
                     {% if assignment.AssignmentStatus==4 %}
-                    <span class="status completed" onclick="changeStatus({{assignment.AssignmentIndexId}}, 4)"><i class="fas fa-check-circle"></i> Graded</span>
+                    <span class="status completed"><i class="fas fa-check-circle"></i> Graded</span>
                     {% elif assignment.AssignmentStatus==2 %}
-                    <span class="status overdue" onclick="changeStatus({{assignment.AssignmentIndexId}}, 2)"><i class="fas fa-circle-exclamation"></i> Overdue</span>
+                    <span class="status overdue"><i class="fas fa-circle-exclamation"></i> Overdue</span>
                     {% elif assignment.AssignmentStatus==1 %}
-                    <span class="status completed" onclick="changeStatus({{assignment.AssignmentIndexId}}, 1)"><i class="fas fa-check-circle"></i> Completed</span>
+                    <span class="status completed" onclick="cStatus()"><i class="fas fa-check-circle"></i> Completed</span>
                     {% elif assignment.AssignmentStatus==0 %}
-                    <span class="status pending" onclick="changeStatus({{assignment.AssignmentIndexId}}, 0)"><i class="fas fa-hourglass-half"></i> In Progress</span>
+                    <span class="status pending" onclick="cStatus()"><i class="fas fa-hourglass-half"></i> In Progress</span>
                     {% elif assignment.AssignmentStatus==-1 %}
-                    <span class="status upcoming" onclick="changeStatus({{assignment.AssignmentIndexId}}, -1)"><i class="fas fa-circle-plus"></i> To Do</span>
+                    <span class="status upcoming" onclick="cStatus()"><i class="fas fa-circle-plus"></i> To Do</span>
                     {% endif %}
+					<!-- make a dropdown for the status change -->
+	<select id="status-{{assignment.AssignmentIndexId}}" {% if assignment.AssignmentStatus==4 %}disabled{% endif %} onchange="changeStatus({{ assignment.AssignmentIndexId }})">
+	<option {% if assignment.AssignmentStatus==1 %} selected {% endif %} value="1">Completed</option>
+	<option {% if assignment.AssignmentStatus==0 %} selected {% endif %} value="0">In Progress</option>
+	<option {% if assignment.AssignmentStatus==-1 %} selected {% endif %} value="-1">To Do</option>
+</select>
 <script>
-    function changeStatus(assignmentId, currentStatus) {
+	function cStatus() {
+	}
+    function changeStatus(assignmentId) {
+		var currentStatus = document.getElementById('status-' + assignmentId).value;
         // Define the new status based on the current status
-        let newStatus;
-        switch (currentStatus) {
-            case 4:
-                newStatus = 0; // Change to In Progress
-                break;
-            case 2:
-                newStatus = 1; // Change to Completed
-                break;
-            case 1:
-                newStatus = -1; // Change to To Do
-                break;
-            case 0:
-                newStatus = 4; // Change to Graded
-                break;
-            case -1:
-                newStatus = 0; // Change to Overdue
-                break;
-        }
-
-        // Call the Python function to update the status
-        fetch(`/update_assignment_status/${assignmentId}/${newStatus}`, {
+        fetch(`/update_assignment_status/${assignmentId}/${currentStatus}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -116,7 +134,7 @@
         });
     }
 </script>
-                </div>
+			</div>
             </div>
         </div>
         {% endfor %}
@@ -124,7 +142,7 @@
 
     <!-- Future Assignments Section -->
     <div id="future" class="assignments-section">
-        <h3><i class="fas fa-calendar-alt"></i> Upcoming Assignments</h3>
+		<h3><i class="fas fa-calendar-alt"></i> Upcoming Assignments</h3>
         {% for assignment in apdata.future %}
         <div class="assignment-card">
             <div class="assignment-header">
@@ -152,6 +170,35 @@
                     {% elif assignment.AssignmentStatus==-1 %}
                     <span class="status upcoming"><i class="fas fa-clock"></i> Not Started</span>
                     {% endif %}
+				<select id="status-{{assignment.AssignmentIndexId}}" {% if assignment.AssignmentStatus==4 %}disabled{% endif %} onchange="changeStatus({{ assignment.AssignmentIndexId }})">
+	<option {% if assignment.AssignmentStatus==1 %} selected {% endif %} value="1">Completed</option>
+	<option {% if assignment.AssignmentStatus==0 %} selected {% endif %} value="0">In Progress</option>
+	<option {% if assignment.AssignmentStatus==-1 %} selected {% endif %} value="-1">Not Started</option>
+</select>
+<script>
+	function cStatus() {
+	}
+    function changeStatus(assignmentId) {
+		var currentStatus = document.getElementById('status-' + assignmentId).value;
+        // Define the new status based on the current status
+        fetch(`/update_assignment_status/${assignmentId}/${currentStatus}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (response.ok) {
+                // Reload the page to reflect the changes
+                location.reload();
+            } else {
+                console.error('Failed to update status');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+        });
+    }
+</script>
+
                 </div>
             </div>
         </div>
@@ -163,7 +210,6 @@
     .assignment-tabs {
             display: flex;
             gap: 1rem;
-            margin-bottom: 2rem;
         }
 
         .tab-btn {
@@ -293,6 +339,17 @@
 .status.overdue {
     color: #ff0000;
 }
+.dropdown-content {
+	display: none;
+	position: absolute;
+	background-color: #f9f9f9;
+	min-width: 160px;
+	box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+	z-index: 1;
+}
+.dropdown-content.show {
+	display: block;
+}
 </style>
 <script>
     document.querySelectorAll('.tab-btn').forEach(button => {
@@ -304,7 +361,18 @@
                 // Add active class to clicked button and corresponding section
                 button.classList.add('active');
                 document.getElementById(button.dataset.tab).classList.add('active');
+				// Hash the URL to reflect the current tab, but remember to keep the big index assignments
+				window.location.hash = window.location.hash.substr(1).split("/")[0]+"/"+button.dataset.tab;
             });
         });
+ document.addEventListener('DOMContentLoaded', () => {
+        // Make other tabs inactive
+	    var current_tab=window.location.hash.substr(1).split("/")[1];
+		document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+		document.querySelectorAll('.assignments-section').forEach(s => s.classList.remove('active'));
+		const activeTab = current_tab || 'present';
+		document.getElementById(activeTab.substr(1)).classList.add('active');
+	 	document.getElementById(activeTab).classList.add('active');
+    });
 </script>
 {%- endmacro %}

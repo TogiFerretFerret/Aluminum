@@ -237,7 +237,7 @@
         // Make other tabs inactive
         document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-        const activeTab = window.location.hash.substring(1) || 'bulletin';
+        const activeTab = window.location.hash.substring(1).split("/")[0] || 'bulletin';
         document.querySelector(`.tab-button[data-tab="${activeTab}"]`).classList.add('active');
         document.getElementById(activeTab).classList.add('active');
     });
