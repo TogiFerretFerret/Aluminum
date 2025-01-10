@@ -1,4 +1,5 @@
-{% macro assignmentspage(apdata) -%}<br>
+{% macro assignmentspage(apdata, classdef) -%}<br>
+<script>var assignmentstoshifthash=[]</script>
 <div class="assignments-container">
     <!-- Tab Navigation -->
     <div class="assignment-tabs">
@@ -27,6 +28,13 @@
                 {% if assignment.AssignmentLongDescription %}
                 <div class="assignment-description">
                     {{ assignment.AssignmentLongDescription | safe }}
+                </div>
+                <div class="assignment-actions">
+                    <a href="" id="{{ assignment.AssignmentIndexId }}" class="btn btn-details">More Details</a>
+                    <script> 
+                        var hreft = document.getElementById("{{ assignment.AssignmentIndexId }}");
+                        assignmentstoshifthash.push(hreft);
+                    </script>
                 </div>
                 {% endif %}
                 <div class="assignment-meta">
@@ -90,6 +98,13 @@
                 {% if assignment.AssignmentLongDescription %}
                 <div class="assignment-description">
                     {{ assignment.AssignmentLongDescription | safe }}
+                </div>
+                <div class="assignment-actions">
+                    <a href="" id="{{ assignment.AssignmentIndexId }}" class="btn btn-details">More Details</a>
+                    <script> 
+                        var hreft = document.getElementById("{{ assignment.AssignmentIndexId }}");
+                        assignmentstoshifthash.push(hreft);
+                    </script>
                 </div>
                 {% endif %}
                 <div class="assignment-meta">
@@ -155,6 +170,13 @@
                 {% if assignment.AssignmentLongDescription %}
                 <div class="assignment-description">
                     {{ assignment.AssignmentLongDescription | safe }}
+                </div>
+                <div class="assignment-actions">
+                    <a href="" id="{{ assignment.AssignmentIndexId }}" class="btn btn-details">More Details</a>
+                    <script> 
+                        var hreft = document.getElementById("{{ assignment.AssignmentIndexId }}");
+                        assignmentstoshifthash.push(hreft);
+                    </script>
                 </div>
                 {% endif %}
                 <div class="assignment-meta">
@@ -363,6 +385,9 @@
                 document.getElementById(button.dataset.tab).classList.add('active');
 				// Hash the URL to reflect the current tab, but remember to keep the big index assignments
 				window.location.hash = window.location.hash.substr(1).split("/")[0]+"/"+button.dataset.tab;
+                for (var i = 0; i < assignmentstoshifthash.length; i++) {
+                    assignmentstoshifthash[i].setAttribute("href", `/assignment/{{ classdef }}/`+assignmentstoshifthash[i].id+window.location.hash);
+                }
             });
         });
  document.addEventListener('DOMContentLoaded', () => {
@@ -373,6 +398,9 @@
 		const activeTab = current_tab || 'present';
 		document.getElementById(activeTab.substr(1)).classList.add('active');
 	 	document.getElementById(activeTab).classList.add('active');
+        for (var i = 0; i < assignmentstoshifthash.length; i++) {
+            assignmentstoshifthash[i].setAttribute("href", `/assignment/{{ classdef }}/`+assignmentstoshifthash[i].id+window.location.hash);
+        }
     });
 </script>
 {%- endmacro %}

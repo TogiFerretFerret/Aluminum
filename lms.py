@@ -19,7 +19,7 @@ def run_server():
     ac = googleauth.goog_megaauth()
 @app.route('/')
 def index():
-    time.sleep(0.2)
+    time.sleep(0.001)
     if authz is not None:
         authz.goog_code(ac)
         authz.get_authsvctoken()
@@ -29,7 +29,7 @@ def index():
             classes = api.get_classes()
             return render_template("lms.html", classes=classes)
         else:
-            time.sleep(0.1)
+            time.sleep(0.01)
             if authz.asvc is not None:
                 api = init_api(name)
                 classes = api.get_classes()
@@ -37,14 +37,14 @@ def index():
             else:
                 return redirect("/auth")
     else:
-        time.sleep(0.1)
+        time.sleep(0.01)
         if authz is not None:
             if authz.asvc is not None:
                 api = init_api(name)
                 classes = api.get_classes()
                 return render_template("lms.html", classes=classes)
             else:
-                time.sleep(0.1)
+                time.sleep(0.01)
                 if authz.asvc is not None:
                     api = init_api(name)
                     classes = api.get_classes()
@@ -85,6 +85,20 @@ def classd(id):
         return render_template("class.html", classd=classd, classds=classds, assp=assp)
     else:
         return redirect("/")
+@app.route('/assignment/<classid>/<assignmentid>')
+def assignment(classid, assignmentid):
+    if authz.asvc is not None:
+        api = init_api(name)
+        classds=api.get_class(classid)
+        if len(classds)==2:
+            for c in classds:
+                if c['Current']==1:
+                    classds=c
+        else:
+            classds=classds[0]
+        return render_template("assignment.html", classds=classds, assignment=api.get_assignment(assignmentid))
+    else:
+        return redirect("/")
 @app.route('/auth')
 def auth():
     # Create a new thread to run the server
@@ -109,6 +123,7 @@ def logout():
 @app.route('/update_assignment_status/<id>/<status>', methods=['POST'])
 def update_assignment_status(id, status):
     api = init_api(name)
+    print(api.get_assignment(id))
     return api.update_assstatus(id, status).json()
 if __name__ == '__main__':
     app.run(debug=True,port=5050)

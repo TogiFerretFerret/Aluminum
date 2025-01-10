@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aluminum LMS | {{classds.GroupName}}</title>
+    <title>Aluminum LMS |</title>
     <!--favicon-->
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -25,10 +25,12 @@
 </head>
 <body>
     {% from 'sidebar.html' import sidebar as sidebar %}
-    {% from 'assignmentspage.html' import assignmentspage as assignmentspage %}
     {{sidebar()}}
     <main class="main-content">
-        <a href="/" class="back-button"><i class="fa fa-arrow-left"></i></a>
+        <a href="/class/{{classds.LeadSectionId}}" id="verybackbutton" class="back-button"><i class="fa fa-arrow-left"></i></a>
+        <script>
+            document.getElementById('verybackbutton').setAttribute('href', '/class/{{classds.LeadSectionId}}'+window.location.hash);
+        </script>
         <div style="padding-bottom:10px;"></div>
         <div class="course-header">
             <div class="course-title-section">
@@ -74,50 +76,6 @@
             <h3>Course Description</h3>
             <div class="description-content">
                 {{classds.Description | safe}}
-            </div>
-        </div>
-        
-        <!-- Add Tab Navigation -->
-        <div class="course-tabs">
-            <button class="tab-button active" data-tab="bulletin">
-                <i class="fas fa-bullhorn"></i> Bulletin Board
-            </button>
-            <button class="tab-button" data-tab="assignments">
-                <i class="fas fa-tasks"></i> Assignments
-            </button>
-            <button class="tab-button" data-tab="topics">
-                <i class="fas fa-book"></i> Topics
-            </button>
-            <button class="tab-button" data-tab="roster">
-                <i class="fas fa-users"></i> Teacher Details
-            </button>
-        </div>
-        
-        <!-- Tab Content -->
-        <div class="tab-content">
-            <div id="bulletin" class="tab-pane active">
-                <div class="content-card">
-                    <h3>Bulletin Board</h3>
-                    <!-- Bulletin content will go here -->
-                </div>
-            </div>
-            <div id="assignments" class="tab-pane">
-                <div class="content-card">
-                    <h3>Assignments</h3>
-                    {{assignmentspage(assp,classds.LeadSectionId)}}
-                </div>
-            </div> 
-            <div id="topics" class="tab-pane">
-                <div class="content-card">
-                    <h3>Topics</h3>
-                    <!-- Topics content will go here -->
-                </div>
-            </div>
-            <div id="roster" class="tab-pane">
-                <div class="content-card">
-                    <h3>Teacher Details</h3>
-                    <!-- Roster content will go here -->
-                </div>
             </div>
         </div>
     </main>
@@ -233,31 +191,5 @@
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     </style>
-    
-<script>
-    document.querySelectorAll('.tab-button').forEach(button => {
-        button.addEventListener('click', () => {
-            // Remove active class from all buttons and panes
-            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-            
-            // Add active class to clicked button and corresponding pane
-            button.classList.add('active');
-            document.getElementById(button.dataset.tab).classList.add('active');
-            // Save the active tab to the URL hash
-            window.location.hash = button.dataset.tab;
-        });
-    });
-
-    // On page load, set the active tab from the URL hash
-    document.addEventListener('DOMContentLoaded', () => {
-        // Make other tabs inactive
-        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-        const activeTab = window.location.hash.substring(1).split("/")[0] || 'bulletin';
-        document.querySelector(`.tab-button[data-tab="${activeTab}"]`).classList.add('active');
-        document.getElementById(activeTab).classList.add('active');
-    });
-</script>
 </body>
 </html>
