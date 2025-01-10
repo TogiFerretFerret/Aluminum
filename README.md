@@ -3,6 +3,8 @@ An explosively awesome desktop/mobile frontend for Blackbaud, built off the Brom
 
 I would highly recommend using python 3.10 (atl i used that in testing).
 
+run make uv and in another terminal tab run python3 lms.py
+
 Edit makefile as necessary
 #### Please `make install`
 and start it
