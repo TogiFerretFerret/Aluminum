@@ -135,8 +135,6 @@ def getfile(fname,path):
     # Convert to byte string
     #download file to user
     # Write file to disk
-    with open(fname, 'wb') as f:
-        f.write(filecontents)
     return send_file(io.BytesIO(filecontents), as_attachment=True, download_name=fname)
 if __name__ == '__main__':
     app.run(debug=True,port=5050)
