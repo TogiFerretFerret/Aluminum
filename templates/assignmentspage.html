@@ -374,6 +374,10 @@
 }
 </style>
 <script>
+
+        for (var i = 0; i < assignmentstoshifthash.length; i++) {
+            assignmentstoshifthash[i].setAttribute("href", `/assignment/{{ classdef }}/`+assignmentstoshifthash[i].id+window.location.hash);
+        }
     document.querySelectorAll('.tab-btn').forEach(button => {
             button.addEventListener('click', () => {
                 // Remove active class from all buttons and sections

@@ -1,15 +1,17 @@
 import bromine.apiwrapper as apiwrapper
 import bromine.authwrapper as authwrapper
-import bromine.googleauth as googleauth
+import bromine.googleauth as gleauth
 from flask import Flask, render_template, redirect, send_from_directory, send_file
 import io
 import time # THIS IS FUCKING JANK. I'M SORRY.
 import json
 import threading 
 import base64
+import bromine.CONFIG as CONFIG
 name=""
 authz = None
 ac=None
+googleauth = gleauth.vgtest
 app = Flask(__name__)
 def init_api(username):
     authz.get_bearer_token()
@@ -20,9 +22,13 @@ def run_server():
     global ac
     ac = googleauth.goog_megaauth()
 app.jinja_env.filters['b64encode'] = base64.b64encode
+@app.route('/seturl/<namez>')
+def seturl(namez):
+    global ac
+    ac = base64.b64decode(namez).decode("utf-8")
+    return redirect("/")
 @app.route('/')
 def index():
-    time.sleep(0.001)
     if authz is not None:
         authz.goog_code(ac)
         authz.get_authsvctoken()
@@ -113,7 +119,7 @@ def auth_name(namez):
     global authz, name
     name = namez
     authz = authwrapper.BbAuthWrapper(name)
-    return redirect(googleauth.goog_murl(name))
+    return redirect(gleauth.goog_murl(name))
 @app.route('/static/<path:path>')
 def send_report(path):
     # Using request args for path will expose you to directory traversal attacks
@@ -137,4 +143,4 @@ def getfile(fname,path):
     # Write file to disk
     return send_file(io.BytesIO(filecontents), as_attachment=True, download_name=fname)
 if __name__ == '__main__':
-    app.run(debug=True,port=5050)
+    app.run(debug=True,port=CONFIG.lms_url.split(":")[-1])

@@ -99,6 +99,12 @@
                 <div class="content-card">
                     <h3>Assignments</h3>
                     {{assignmentspage(assp,classds.LeadSectionId)}}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+        for (var i = 0; i < assignmentstoshifthash.length; i++) {
+            assignmentstoshifthash[i].setAttribute("href", `/assignment/{{ classds.LeadSectionId }}/`+assignmentstoshifthash[i].id+window.location.hash);
+        }});
+		</script>
                 </div>
             </div> 
             <div id="topics" class="tab-pane">
@@ -240,6 +246,10 @@
             document.getElementById(button.dataset.tab).classList.add('active');
             // Save the active tab to the URL hash
             window.location.hash = button.dataset.tab;
+
+        for (var i = 0; i < assignmentstoshifthash.length; i++) {
+            assignmentstoshifthash[i].setAttribute("href", `/assignment/{{ classds.LeadSectionId }}/`+assignmentstoshifthash[i].id+window.location.hash);
+        }
         });
     });
 
@@ -251,6 +261,10 @@
         const activeTab = window.location.hash.substring(1).split("/")[0] || 'bulletin';
         document.querySelector(`.tab-button[data-tab="${activeTab}"]`).classList.add('active');
         document.getElementById(activeTab).classList.add('active');
+
+        for (var i = 0; i < assignmentstoshifthash.length; i++) {
+            assignmentstoshifthash[i].setAttribute("href", `/assignment/{{ classds.LeadSectionId }}/`+assignmentstoshifthash[i].id+window.location.hash);
+        }
     });
 </script>
 </body>

@@ -1,2 +1,4 @@
 node_modules/
 bromine/__pycache__/
+bromine/tmp.txt
+tmp.txt

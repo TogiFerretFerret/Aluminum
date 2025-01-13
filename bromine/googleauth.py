@@ -7,20 +7,11 @@ import multiprocessing
 import os
 import signal
 import bromine.CONFIG as CONFIG
-PORT=5420
-def finish_auth(oauth_url):
-        """
-        Writes the provided OAuth URL to a temporary file.
-
-        Args:
-            oauth_url (str): The OAuth URL to be written to the file.
-
-        Writes:
-            The OAuth URL to a file named 'tmp.txt' in the current working directory.
-        """
-        with open("tmp.txt", "w") as f:
-            f.write(oauth_url)
+PORT=CONFIG.self_url.split(":")[-1]
+vgtest=None
 app = Flask(__name__)
+# Copilot, why does the oauth_url variable not update and it returns none? Explain in the comment below.
+# The variable oauth_url is not updating because the function finish_auth is not updating the global variable oauth_url. The function finish_auth is updating a local variable oauth_url instead of the global variable oauth_url. To fix this, the function finish_auth should update the global variable oauth_url instead of a local variable.
 @app.route('/seturl')
 def seturl():
     """
@@ -35,8 +26,10 @@ def seturl():
     """
     oauth_url = base64.b64decode(request.args.get('url')).decode("utf-8")
     shutdown_server()
-    finish_auth(oauth_url=oauth_url)
-    return redirect(CONFIG.lms_url)
+    vgtest.finish_auth(oauth_url=oauth_url)
+    print("URL set")
+    print("url ",vgtest.globalvar)
+    return redirect(f"{CONFIG.lms_url}/seturl/{base64.b64encode(vgtest.globalvar.encode('utf-8')).decode('utf-8')}")
 def shutdown_server():
     """
     Shuts down the server by sending a SIGINT signal to the current process.
@@ -48,6 +41,7 @@ def shutdown_server():
     Raises:
         OSError: If the signal could not be sent.
     """
+    print("killing server")
     os.kill(os.getpid(), signal.SIGINT)
 def run_server():
     """
@@ -62,6 +56,7 @@ def run_server():
     Returns:
         None
     """
+    print("running server")
     serve(app, host='0.0.0.0', port=PORT)
 def goog_murl(uid):
     """
@@ -81,27 +76,48 @@ def goog_murl(uid):
     gurl = wrap.goog_oauthurl()
     gurl = f"{CONFIG.proxyurl}/?redirector={CONFIG.self_url}&url={gurl}"
     return gurl
-def goog_megaauth():
-    """
-    Handles the OAuth authentication process for Google.
+class gauthw:
+    def __init__(self):
+        self.globalvar=""
+    def finish_auth(self,oauth_url):
+            """
+            Writes the provided OAuth URL to a temporary file.
 
-    This function initiates a local server to handle the OAuth callback,
-    writes a temporary file to communicate the OAuth URL, and waits for
-    the URL to be updated before terminating the server process.
+            Args:
+                oauth_url (str): The OAuth URL to be written to the file.
 
-    Returns:
-        str: The OAuth URL after the user logs in.
-    """
-    with open("tmp.txt", "w") as f:
-        f.write("None")
-    oauth_url = "None"
-    server_process = multiprocessing.Process(target=run_server)
-    server_process.start()
-    while not oauth_url.startswith("http"):
-        with open("tmp.txt", "r") as f:
-            oauth_url = f.read()
-    import time
-    time.sleep(0.001) # Time to return
-    server_process.terminate()
-    # After the user logs in, you can use the oauth_url variable
-    return oauth_url
+            Writes:
+                The OAuth URL to a file named 'tmp.txt' in the current working directory.
+            """
+            # this is clearly updating the global variable
+            self.globalvar=oauth_url
+            print(self.globalvar)
+            print("little fukker")
+            '''
+            with open("tmp.txt", "w") as f:
+                f.write(oauth_url)'''
+    def goog_megaauth(self):
+        """
+        Handles the OAuth authentication process for Google.
+
+        This function initiates a local server to handle the OAuth callback,
+        writes a temporary file to communicate the OAuth URL, and waits for
+        the URL to be updated before terminating the server process.
+
+        Returns:
+            str: The OAuth URL after the user logs in.
+        """'''
+        with open("tmp.txt", "w") as f:
+            f.write("None")'''
+        server_process = multiprocessing.Process(target=run_server)
+        server_process.start()
+        # Why is this not working?
+        print("function")
+        print(self.globalvar)
+        # Why is the above not being printed?
+        # The above is not being printed because the function finish_auth is not updating the global variable oauth_url. The function finish_auth is updating a local variable oauth_url instead of the global variable oauth_url. To fix this, the function finish_auth should update the global variable oauth_url instead of a local variable. but im printing globalvar not oauth_url
+        # The above is not being printed because the global variable oauth_url is not being updated. The function finish_auth is updating a local variable oauth_url instead of the global variable oauth_url. To fix this, the function finish_auth should update the global variable oauth_url instead of a local variable.
+        server_process.terminate()
+        # After the user logs in, you can use the oauth_url variable
+        return self.globalvar
+vgtest=gauthw()

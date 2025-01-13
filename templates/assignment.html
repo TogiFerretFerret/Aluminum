@@ -36,7 +36,9 @@
                 <h1>{{assignment.ShortDescription | safe}}</h1>
                 <div class="assignment-meta">
                     <span class="badge">{{assignment.AssignmentType}}</span>
+					{% if 'MaxPoints' in assignment %}
                     <span class="points">Max {{assignment.MaxPoints}} points</span>
+					{% endif %}
                     <!--if its graded, say graded -->
                     {% if assignment.IsGraded %}
                     <span class="badge" style="background-color: #28a745;color:white;">Graded: {{assignment.AssignmentGrade.GradebookGrade}}/{{assignment.MaxPoints}}</span>
@@ -53,6 +55,10 @@
                     <i class="fas fa-calendar-check"></i>
                     <span>Due: {{assignment.DueDate}}</span>
                 </div>
+				<!--
+				<div class="date-item">
+					<span>Assignment ID: {{assignment.AssignmentId}}</span>
+				</div>-->
             </div>
 
             <div class="description-section">
@@ -62,14 +68,20 @@
                     {{assignment}}
                 </div>
             </div>
-
+			
             {% if assignment.DropboxInd %}
             <div class="submission-section">
                 <h2>Submission</h2>
-                <p><i class="fas fa-upload"></i> Submit up to {{assignment.DropboxNumFiles}} file(s)</p>
+				<br>
+                <p><i class="fas fa-upload"></i> Submit up to {{assignment.DropboxNumFiles}} file(s)</p><br>
                 {% if assignment.SubmissionResults %}
                 <div class="submitted-work">
-                    <h3>Your Submission</h3>
+                    <h3>Your Submission</h3><br>
+					{% if assignment.AssignmentGrade.GradedComment!='' %}
+					<h4>Comments</h4>
+					<p>{{assignment.AssignmentGrade.GradedComment|safe}}</p>	<br>
+					{% endif %}
+					<h4>Submitted Files</h4>
                     {% for submission in assignment.SubmissionResults %}
                     <div class="submission-item">
                         <i class="fas fa-file-alt"></i>
