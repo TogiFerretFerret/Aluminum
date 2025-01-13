@@ -373,34 +373,4 @@
 	display: block;
 }
 </style>
-<script>
-    document.querySelectorAll('.tab-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                // Remove active class from all buttons and sections
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.assignments-section').forEach(s => s.classList.remove('active'));
-                
-                // Add active class to clicked button and corresponding section
-                button.classList.add('active');
-                document.getElementById(button.dataset.tab).classList.add('active');
-				// Hash the URL to reflect the current tab, but remember to keep the big index assignments
-				window.location.hash = window.location.hash.substr(1).split("/")[0]+"/"+button.dataset.tab;
-                for (var i = 0; i < assignmentstoshifthash.length; i++) {
-                    assignmentstoshifthash[i].setAttribute("href", `/assignment/{{ classdef }}/`+assignmentstoshifthash[i].id+window.location.hash);
-                }
-            });
-        });
- document.addEventListener('DOMContentLoaded', () => {
-        // Make other tabs inactive
-	    var current_tab=window.location.hash.substr(1).split("/")[1];
-		document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-		document.querySelectorAll('.assignments-section').forEach(s => s.classList.remove('active'));
-		const activeTab = current_tab || 'present';
-		document.getElementById(activeTab.substr(1)).classList.add('active');
-	 	document.getElementById(activeTab).classList.add('active');
-        for (var i = 0; i < assignmentstoshifthash.length; i++) {
-            assignmentstoshifthash[i].setAttribute("href", `/assignment/{{ classdef }}/`+assignmentstoshifthash[i].id+window.location.hash);
-        }
-    });
-</script>
 {%- endmacro %}

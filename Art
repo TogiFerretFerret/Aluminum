@@ -1,0 +1,91 @@
+<html><head><title>40X - Forbidden</title></head><body>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>Blackbaud | Custom Error 40X</title>
+	<style type="text/css">
+		body{height: 100%; width:100% !important; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; margin:0; padding:0; background: #ccc; text-align: center;} 
+		html{height: 100%;}
+		img {outline:none; text-decoration:none; -ms-interpolation-mode: bicubic;} 
+		
+		a img {border:none;} 
+		
+		a {color: orange;}
+
+
+		.bodyContent img{
+			display:inline;
+			height:auto;
+		}
+	
+		#mainContent{
+			width: 600px;
+			margin: 0px auto;
+			padding: 30px 0 0;
+			text-align: left;
+			line-height: 1.5;
+			font-family: verdana;
+			font-size: 14px;
+			color: #333;
+		}
+		#headercontent{
+			background: white url(https://common.myschoolcdn.com/hosting/logos/main_site_back_v4.gif);
+			text-align: center;
+		    padding: 20px 0;
+		}
+		#textcontent{
+			background: white;
+			padding: 10px 45px;
+		}
+		#footercontent{
+			text-align: center;
+			font-size: .8em;
+			color: #444;
+		}
+		
+
+	</style>
+
+	
+</head>
+<body>
+	<div id="mainContent">
+		<div>
+			<div id="headercontent"><a href="http://www.blackbaud.com"><img src="https://common.myschoolcdn.com/hosting/logos/blackbaud-logo.png" /></a></div>
+			<div id="textcontent">
+			<p>You have tried to access a page that is either unavailable or forbidden. 
+			<br><br>
+
+			The most likely causes of this message are:
+
+			<br><br>			
+
+			<OL>
+			<li>You might have tried to perform an operation that is not allowed.</li>
+			<li>All violations are logged.</li>
+			</OL>
+
+			<br>			
+			
+			<strong>It is recommended that you NOT try to perform your request again. It is unlikely to succeed in the future. </strong>
+
+			<br><br>
+
+			Blackbaud K-12 conducts routine maintenance during a weekly maintenance and testing window on Saturdays from 12:00AM – 6:00AM ET. If you receive this message during that window that is the likely cause. 
+			<br><br>
+			If you receive this message any other time please check our Corporate Status and Maintenance pages: 
+			<br><br>
+			<a href="https://status.blackbaud.com/">https://status.blackbaud.com/</a> 
+			<br><br>
+			<a href="https://maintenance.blackbaud.com/">https://maintenance.blackbaud.com/</a></p>
+			<p align="center"><FONT COLOR="FFFFFF">APP SHIELD</FONT></p>
+		</div>			
+							
+				<div id="footercontent"><p>Blackbaud K-12  ::  6 Bedford Farms Dr.  ::  2nd Fl, East Wing  ::  Bedford, NH 03110</p></div>
+	</div>				
+<!-- End of wrapper table -->
+</body>
+</html></body></html>

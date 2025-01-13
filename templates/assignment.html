@@ -73,8 +73,13 @@
                     {% for submission in assignment.SubmissionResults %}
                     <div class="submission-item">
                         <i class="fas fa-file-alt"></i>
-                        <a href="/getfile/{{submission.DownloadUrl}}">{{submission.FileName}}</a>
+                        {% if submission.GoogleExternalUrl=='' %}
+                        {% set deskt = submission.DownloadUrl.encode('utf-8') | b64encode %}
+                        <a href="/getfile/{{submission.FileName}}/{{ deskt.decode('utf-8') }}">{{submission.FileName}}</a>
                         <span class="submission-date">Submitted: {{submission.LastSubmitDate}}</span>
+                        {% else %}
+                        <a href="{{submission.GoogleExternalUrl}}">{{submission.FileName}}</a>
+                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>

@@ -1,10 +1,12 @@
 import bromine.apiwrapper as apiwrapper
 import bromine.authwrapper as authwrapper
 import bromine.googleauth as googleauth
-from flask import Flask, render_template, redirect, send_from_directory
+from flask import Flask, render_template, redirect, send_from_directory, send_file
+import io
 import time # THIS IS FUCKING JANK. I'M SORRY.
 import json
 import threading 
+import base64
 name=""
 authz = None
 ac=None
@@ -13,10 +15,11 @@ def init_api(username):
     authz.get_bearer_token()
     tt = authz.get_tt()
     print(tt)
-    return apiwrapper.BbApiWrapper(tt)
+    return apiwrapper.BbApiWrapper(tt, authz.get_session())
 def run_server():
     global ac
     ac = googleauth.goog_megaauth()
+app.jinja_env.filters['b64encode'] = base64.b64encode
 @app.route('/')
 def index():
     time.sleep(0.001)
@@ -125,9 +128,15 @@ def update_assignment_status(id, status):
     api = init_api(name)
     print(api.get_assignment(id))
     return api.update_assstatus(id, status).json()
-@app.route('/getfile/<path:path>')
-def getfile(path):
+@app.route('/getfile/<fname>/<path>')
+def getfile(fname,path):
     api = init_api(name)
-    return api.get_file(path).content
+    filecontents = api.get_file(path).content
+    # Convert to byte string
+    #download file to user
+    # Write file to disk
+    with open(fname, 'wb') as f:
+        f.write(filecontents)
+    return send_file(io.BytesIO(filecontents), as_attachment=True, download_name=fname)
 if __name__ == '__main__':
     app.run(debug=True,port=5050)
