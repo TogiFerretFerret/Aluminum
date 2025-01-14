@@ -1,0 +1,8 @@
+{
+    "main": "src/index.js",
+    "output": "dist/uv-app",
+    "type": "module",
+    "resources": [
+      "ultraviolet-static/**/*"
+    ]
+  }

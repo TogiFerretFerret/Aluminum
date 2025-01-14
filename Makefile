@@ -10,3 +10,5 @@ ckill:
 	lsof -ti:5050 | xargs kill -9 2>/dev/null || true
 bkill:
 	lsof -ti:5420 | xargs kill -9 2>/dev/null || true
+linuxbuild:
+	node --experimental-sea-config sea-config.json && cd dist && cp $(command -v node) finalapp && npx postject finalapp NODE_SEA_BLOB uv-app --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
