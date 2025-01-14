@@ -7,8 +7,10 @@ install:
 uvkill:
 	lsof -ti:8000 | xargs kill -9 2>/dev/null || true
 ckill:
-	lsof -ti:5050 | xargs kill -9 2>/dev/null || true
+	lsof -ti:7272 | xargs kill -9 2>/dev/null || true
 bkill:
-	lsof -ti:5420 | xargs kill -9 2>/dev/null || true
-linuxbuild:
-	node --experimental-sea-config sea-config.json && cd dist && cp $(command -v node) finalapp && npx postject finalapp NODE_SEA_BLOB uv-app --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
+	lsof -ti:7420 | xargs kill -9 2>/dev/null || true
+nodeclean:
+	rm -rf node
+npmclean:
+	rm -rf node_modules && rm -rf Ultraviolet-Static/node_modules

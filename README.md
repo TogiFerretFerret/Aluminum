@@ -6,8 +6,10 @@ I would highly recommend using python 3.10 (atl i used that in testing).
 run make uv and in another terminal tab run python3 lms.py
 
 Edit makefile as necessary
-#### Please `make install`
-and start it
+### FAQ
+#### How to install?
+Get python (3.10 should work)
+Install requirements (requirements.txt)
 ### IFAQ (Infrequently Frequently Asked Questions)
 #### Why?
 Since Blackbaud is dogshit

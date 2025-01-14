@@ -1,6 +1,6 @@
-import base64
 import requests
 import datetime
+import base64
 class BbApiWrapper:
     """
     A wrapper class for interacting with the Bb API.
@@ -162,13 +162,7 @@ class BbApiWrapper:
         headers['referer']="https://hunterschools.myschoolapp.com/lms-assignment/assignment-center/student"
         body={"assignmentIndexId": aii,"assignmentStatus": state}
         return requests.post(url,headers=headers,json=body)
-    def get_file(self, path):
-        path=base64.b64decode(path).decode("utf-8")
-        session = requests.Session()
-        h = self.get_headers()
-        h["accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
-        h['referer'] = "https://hunterschools.myschoolapp.com/lms-assignment/assignment-center/student"
-        h['authority'] = "hunterschools.myschoolapp.com"
-        session.headers.update(h)
-        print(f"https://hunterschools.myschoolapp.com/{path}")
-        return session.get(f"https://hunterschools.myschoolapp.com/{path}")
+    def get_file(self,path):
+        path=base64.b64decode(path).decode('utf-8')
+        h=self.get_headers()
+        return requests.get(f"https://hunterschools.myschoolapp.com/{path}",headers=h)

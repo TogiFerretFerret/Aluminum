@@ -1,4 +1,10 @@
 node_modules/
+Ultraviolet-Static/node_modules/
 bromine/__pycache__/
 bromine/tmp.txt
 tmp.txt
+node/
+*.tar.xz
+*.tar.gz
+*.zip
+venv/

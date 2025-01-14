@@ -1,6 +1,6 @@
 import bromine.apiwrapper as apiwrapper
 import bromine.authwrapper as authwrapper
-import bromine.googleauth as gleauth
+import bromine.googleauth as googleauth
 from flask import Flask, render_template, redirect, send_from_directory, send_file
 import io
 import time # THIS IS FUCKING JANK. I'M SORRY.
@@ -10,27 +10,29 @@ import base64
 import bromine.CONFIG as CONFIG
 name=""
 authz = None
-ac=None
-googleauth = gleauth.vgtest
+GoogleAuthProc=None
+GoogleAuthUrl=None
 app = Flask(__name__)
 def init_api(username):
     authz.get_bearer_token()
     tt = authz.get_tt()
     print(tt)
-    return apiwrapper.BbApiWrapper(tt, authz.get_session())
+    return apiwrapper.BbApiWrapper(tt)
 def run_server():
-    global ac
-    ac = googleauth.goog_megaauth()
+    global GoogleAuthProc
+    GoogleAuthProc = googleauth.goog_megaauth()
 app.jinja_env.filters['b64encode'] = base64.b64encode
 @app.route('/seturl/<namez>')
 def seturl(namez):
-    global ac
-    ac = base64.b64decode(namez).decode("utf-8")
+    global GoogleAuthUrl
+    GoogleAuthUrl = base64.b64decode(namez).decode("utf-8")
+    print("Terminating server...")
+    GoogleAuthProc.terminate()
     return redirect("/")
 @app.route('/')
 def index():
     if authz is not None:
-        authz.goog_code(ac)
+        authz.goog_code(GoogleAuthUrl)
         authz.get_authsvctoken()
     if authz is not None:
         if authz.asvc is not None:
@@ -64,20 +66,7 @@ def index():
             return redirect("/auth")
 @app.route('/grades')
 def grades():
-    if authz.asvc is not None:
-        api = init_api(name)
-        classes = api.get_classes()
-        uid = {}
-        data={}
-        for cl in classes:
-            uid[cl['LeadSectionId']] = api.get_assignments(cl["LeadSectionId"])
-            assp=uid[cl['LeadSectionId']]
-            for assignment in assp:
-                data[cl['LeadSectionId']]={}
-                data[cl['LeadSectionId']][assignment['AssignmentIndexId']]=api.get_assignment(assignment['AssignmentIndexId'])
-        return render_template("grades.html", uid=uid, classes=classes,data=data)
-    else:
-        return redirect("/")
+    pass
 @app.route('/class/<id>')
 def classd(id):
     if authz.asvc is not None:
@@ -119,7 +108,7 @@ def auth_name(namez):
     global authz, name
     name = namez
     authz = authwrapper.BbAuthWrapper(name)
-    return redirect(gleauth.goog_murl(name))
+    return redirect(googleauth.goog_murl(name))
 @app.route('/static/<path:path>')
 def send_report(path):
     # Using request args for path will expose you to directory traversal attacks
@@ -132,7 +121,6 @@ def logout():
 @app.route('/update_assignment_status/<id>/<status>', methods=['POST'])
 def update_assignment_status(id, status):
     api = init_api(name)
-    print(api.get_assignment(id))
     return api.update_assstatus(id, status).json()
 @app.route('/getfile/<fname>/<path>')
 def getfile(fname,path):
@@ -143,4 +131,4 @@ def getfile(fname,path):
     # Write file to disk
     return send_file(io.BytesIO(filecontents), as_attachment=True, download_name=fname)
 if __name__ == '__main__':
-    app.run(debug=True,port=CONFIG.lms_url.split(":")[-1])
+    app.run(debug=True,port=7272)
