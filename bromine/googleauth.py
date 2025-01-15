@@ -1,14 +1,15 @@
-import time
-import bromine.authwrapper as authwrapper
 import base64
-from flask import Flask, request, redirect
-import multiprocessing
 import os
 import signal
+import multiprocessing
+from flask import Flask, request, redirect
 from waitress import serve
+import bromine.authwrapper as authwrapper
 import bromine.CONFIG as CONFIG
-PORT=7420
+
+PORT = 7420
 app = Flask(__name__)
+
 @app.route('/seturl')
 def seturl():
     """
@@ -27,6 +28,7 @@ def seturl():
     shutdown_server()
     print("Redirecting to OAuth URL...")
     return redirect(f"{CONFIG.lms_url}/seturl/{base64.b64encode(oauth_url.encode('utf-8')).decode('utf-8')}")
+
 def shutdown_server():
     """
     Shuts down the server by sending a SIGINT signal to the current process.
@@ -39,12 +41,13 @@ def shutdown_server():
         OSError: If the signal could not be sent.
     """
     print("Shutting down server...")
-    os.kill(os.getpid(), signal.SIGINT)
+    os.kill(os.getpid(), signal.SIGINT) # Can this be done in a more elegant way?
+
 def run_server():
     """
     Starts the server to serve the application.
 
-    This function initializes and runs the server on host '0.0.0.0' and port 5000,
+    This function initializes and runs the server on host '127.0.0.1' and port 7420,
     making the application accessible on the specified host and port.
 
     Args:
@@ -56,6 +59,7 @@ def run_server():
     print("Starting server...")
     serve(app, host='127.0.0.1', port=PORT)
     print("Server started.")
+
 def goog_murl(uid):
     """
     Generates a Google OAuth URL for the given user ID.
@@ -71,9 +75,10 @@ def goog_murl(uid):
         str: The constructed Google OAuth URL with proxy and redirector.
     """
     wrap = authwrapper.BbAuthWrapper(uid)
-    gurl = wrap.goog_oauthurl()
-    gurl = f"{CONFIG.proxyurl}/?redirector={CONFIG.self_url}&url={gurl}"
-    return gurl
+    google_auth_url = wrap.goog_oauthurl()
+    google_auth_url = f"{CONFIG.proxyurl}/?redirector={CONFIG.self_url}&url={google_auth_url}"
+    return google_auth_url
+
 def goog_megaauth():
     """
     Handles the OAuth authentication process for Google.
@@ -83,9 +88,8 @@ def goog_megaauth():
     the URL to be updated before terminating the server process.
 
     Returns:
-        str: The OAuth URL after the user logs in.
+        multiprocessing.Process: The server process handling the OAuth callback.
     """
-    oauth_url = "None"
     server_process = multiprocessing.Process(target=run_server)
     server_process.start()
     print("Server process started.")
