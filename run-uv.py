@@ -44,6 +44,7 @@ def run_script(node_executable):
     subprocess.run([node_executable, script_path])
 
 def main():
+    global node_executable
     node_path = download_node()
     extract_path = extract_node(node_path)
     system = platform.system().lower()
