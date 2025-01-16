@@ -4,7 +4,8 @@ import subprocess
 import urllib.request
 import tarfile
 import zipfile
-
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 NODE_VERSION = "20.18.1"
 NODE_DIST_URL = "https://nodejs.org/dist/v{}/".format(NODE_VERSION)
 NODE_EXECUTABLE = "node"
