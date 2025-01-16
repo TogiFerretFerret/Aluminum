@@ -8,6 +8,7 @@ import zipfile
 NODE_VERSION = "20.18.1"
 NODE_DIST_URL = "https://nodejs.org/dist/v{}/".format(NODE_VERSION)
 NODE_EXECUTABLE = "node"
+
 def download_node():
     system = platform.system().lower()
     arch = platform.machine().lower()
@@ -25,8 +26,9 @@ def download_node():
     print("Downloading Node.js from:", node_url)
     urllib.request.urlretrieve(node_url, node_path)
     print("Downloaded to:", node_path)
-
+    
     return node_path
+
 def extract_node(node_path):
     extract_path = os.path.join(os.getcwd(), "node")
     if node_path.endswith(".zip"):
@@ -39,36 +41,47 @@ def extract_node(node_path):
     os.remove(node_path)
     print("Extracted to:", extract_path)
     return extract_path
+
+def add_to_path(bin_path):
+    os.environ["PATH"] = bin_path + os.pathsep + os.environ["PATH"]
+
 def run_script(node_executable):
     script_path = os.path.join(os.getcwd(), "src", "index.js")
     subprocess.run([node_executable, script_path])
 
 def main():
-    global node_executable
+    global NODE_EXECUTABLE
     node_path = download_node()
     extract_path = extract_node(node_path)
     system = platform.system().lower()
     arch = platform.machine().lower()
+    
     if system == "windows":
-        node_filename = "node-v{}-win-{}".format(NODE_VERSION, "x64" if arch.endswith("64") else "x86")
+        node_dir = "node-v{}-win-{}".format(NODE_VERSION, "x64" if arch.endswith("64") else "x86")
+        node_executable = os.path.join(extract_path, node_dir, "node.exe")
+        npm_executable = os.path.join(extract_path, node_dir, "npm.cmd")
     elif system == "darwin":
-        node_filename = "node-v{}-darwin-{}".format(NODE_VERSION, "x64" if arch.endswith("64") else "arm64")
+        node_dir = "node-v{}-darwin-{}".format(NODE_VERSION, "x64" if arch.endswith("64") else "arm64")
+        node_executable = os.path.join(extract_path, node_dir, "bin", "node")
+        npm_executable = os.path.join(extract_path, node_dir, "bin", "npm")
     else:
-        node_filename = "node-v{}-linux-{}".format(NODE_VERSION, "x64" if arch.endswith("64") else "x86")
-    if platform.system().lower() == "windows":
-        node_executable = os.path.join(extract_path, node_filename, "node.exe")
-        os.system(os.path.join(extract_path, node_filename, "npm")+" install")
+        node_dir = "node-v{}-linux-{}".format(NODE_VERSION, "x64" if arch.endswith("64") else "x86")
+        node_executable = os.path.join(extract_path, node_dir, "bin", "node")
+        npm_executable = os.path.join(extract_path, node_dir, "bin", "npm")
+
+    add_to_path(os.path.dirname(node_executable))
+    
+    # Install dependencies
+    if system == "windows":
+        os.system(f"{npm_executable} install")
         os.chdir("Ultraviolet-Static")
-        os.system(os.path.join("..",extract_path, node_filename, "npm")+" install")
+        os.system(f"{npm_executable} install")
         os.chdir("..")
-        # Instll the depencencies in ultraviolet-static
     else:
-        node_executable = os.path.join(extract_path, node_filename,"bin", "node")
-        subprocess.run([os.path.join(extract_path, node_filename, "bin", "npm"), "install"])
+        subprocess.run([npm_executable, "install"])
         os.chdir("Ultraviolet-Static")
-        subprocess.run([os.path.join("..",extract_path, node_filename, "bin", "npm"), "install"])
+        subprocess.run([npm_executable, "install"])
         os.chdir("..")
-    # Install the dependencies
     
     run_script(node_executable)
 
