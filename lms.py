@@ -7,7 +7,10 @@ import json
 import threading 
 import base64
 import bromine.CONFIG as CONFIG
-
+import os
+def add_to_path(bin_path):
+    os.environ["PATH"] = bin_path + os.pathsep + os.environ["PATH"]
+add_to_path(__file__)
 app = Flask(__name__)
 
 # Global variables
