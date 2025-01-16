@@ -4,12 +4,12 @@ import subprocess
 import urllib.request
 import tarfile
 import zipfile
-import sys
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 NODE_VERSION = "20.18.1"
 NODE_DIST_URL = "https://nodejs.org/dist/v{}/".format(NODE_VERSION)
 NODE_EXECUTABLE = "node"
-
+def add_to_path(bin_path):
+    os.environ["PATH"] = bin_path + os.pathsep + os.environ["PATH"]
+add_to_path(__file__)
 def download_node():
     system = platform.system().lower()
     arch = platform.machine().lower()
@@ -42,9 +42,6 @@ def extract_node(node_path):
     os.remove(node_path)
     print("Extracted to:", extract_path)
     return extract_path
-
-def add_to_path(bin_path):
-    os.environ["PATH"] = bin_path + os.pathsep + os.environ["PATH"]
 
 def run_script(node_executable):
     script_path = os.path.join(os.getcwd(), "src", "index.js")
