@@ -56,9 +56,9 @@ def main():
         node_filename = "node-v{}-linux-{}".format(NODE_VERSION, "x64" if arch.endswith("64") else "x86")
     if platform.system().lower() == "windows":
         node_executable = os.path.join(extract_path, node_filename, "node.exe")
-        subprocess.run([os.path.join(extract_path, node_filename, "npm"), "install"])
+        os.system(os.path.join(extract_path, node_filename, "npm")+" install")
         os.chdir("Ultraviolet-Static")
-        subprocess.run([os.path.join("..",extract_path, node_filename, "npm"), "install"])
+        os.system(os.path.join("..",extract_path, node_filename, "npm")+" install")
         os.chdir("..")
         # Instll the depencencies in ultraviolet-static
     else:
