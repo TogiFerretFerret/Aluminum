@@ -22,7 +22,7 @@ python\python.exe -m pip install -r requirements.txt
 REM Open two command windows to run lms.py and run-uv.py
 echo Starting lms.py and run-uv.py in separate command windows...
 start cmd /k python\python.exe run-uv.py
-sleep 3
+powershell Start-Sleep -m 500
 start cmd /k python\python.exe lms.py
 echo All tasks completed.
 endlocal
