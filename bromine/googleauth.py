@@ -25,7 +25,6 @@ def seturl():
     oauth_url = base64.b64decode(request.args.get('url')).decode("utf-8")
     print(oauth_url)
     print("Shutting down server...")
-    shutdown_server()
     print("Redirecting to OAuth URL...")
     return redirect(f"{CONFIG.lms_url}/seturl/{base64.b64encode(oauth_url.encode('utf-8')).decode('utf-8')}")
 
