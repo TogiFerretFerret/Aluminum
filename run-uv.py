@@ -75,6 +75,7 @@ def main():
         os.chdir("Ultraviolet-Static")
         os.system(f"{npm_executable} install")
         os.chdir("..")
+        os.system("start cmd /k python\python.exe lms.py")
     else:
         subprocess.run([npm_executable, "install"])
         os.chdir("Ultraviolet-Static")
