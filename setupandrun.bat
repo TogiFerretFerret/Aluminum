@@ -14,6 +14,7 @@ python\python.exe pipfix.py
 echo Installing pip...
 curl -LO https://bootstrap.pypa.io/get-pip.py
 python\python.exe get-pip.py
+del %CD%\python\none.save
 ren %CD%\python\python310._pth none.save
 REM Install packages from requirements.txt
 echo Installing required packages...
