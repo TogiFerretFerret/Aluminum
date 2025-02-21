@@ -24,11 +24,11 @@ Because the desktop website is dogshit. I said that already.
 #### Why not just use Gavin's Extension?
 Gavin's Extension isn't bad, but it's kinda hacky. Mine is also kinda hacky, but it's a different kind of hacky.
 #### Why not windows yet?
-Yeah, it works on windows. I just haven't tested it yet. I'll get to it. If you want, send a PR (no need for tests [how the fuck would you implement tests?]). Also edit you makefile as needed. Please don't commit your makefile (if you do its fine);
+Yeah, it works on windows. There's litearlly a bat file right there. Moron.
 #### Why is there two programming languages?
 Basically, I didn't want to rewrite Ultraviolet (the proxy used for Google Authentication) when I made this, so uhh, have fun! And I wasn't going to write the rest of the app in JS, though DarkSystemGit (if he isn't working on Atto-24) should be responsible for the JS framework (still private, part of the Bromine Initiative (i havent even added all the api endpoints in this repo to it yet)
 #### Why is the googleauth.py absolute garbage
-I'll fix it eventually. It had to do with me debugging.
+I'll fix it eventually. It had to do with me debugging. It's less bad now.
 
 
 
