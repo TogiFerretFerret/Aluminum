@@ -36,6 +36,11 @@ Basically, I didn't want to rewrite Ultraviolet (the proxy used for Google Authe
 I'll fix it eventually. It had to do with me debugging. It's less bad now.
 like its gone now actually, i integrated it during the azure catastrophy of right fuckin' now.
 
+why no tests is because i lazy and how da fuck u test this tho?
+also yes mobile support is fukked i think cuz like something with ultraviolet, ill try to figure out why eventually maybe if I do itll probably just be a mobile app that uses like, just the raw api and written in a bunch of shitty swift code and a kitbash of react in there too since the backend is all fukky.
+honestly i should just build out a good api endpoint and run with that but im lazy and dont want to.
+honestly half the difficulty of this project is nonexistent because of how good ultraviolet is and the API RE isn't even hard, i already did discussion boards just too fucking lazy to implement a good ui for them and don't want to fuck up the RTE formatting.
+also im probably gonna have to optimize most of the code since its all fucky rn and i really hate having to re-enter the key each time i feel like it makes people not wanna use it but the cookie will probably save their ass on that since they don't have to re-enter as long as cookie is like "valid".
 
 
 if something fucks up, send an issue. I'll get to it when I can.
