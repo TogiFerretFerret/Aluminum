@@ -3,7 +3,7 @@ This currently is PRIVATE as we are adding Cryptolens licensingm, and its on AZU
 ## NOTE: Currently incompatible with Firefox due to Google Auth Proxying failing to capture the required blackbaud state token from the iframe in Firefox due to security something. A patch is coming soon. See issue [https://github.com/TogiFerretFerret/Aluminum/issues/6]
 ## NOTE: Please ignore @DarkSystemGit's issues. His one requirement for working on this was I let him put at least 1 bullshit issue, but he's important cuz I hate nodejs.
 An explosively awesome desktop/mobile frontend for Blackbaud, built off the Bromine API.
-
+basically whole thing has been reworked to be better at using azure so now its better and supports multi-user with minimal server load, so that's cool. also like cryptolens licensing is chill fr.
 I would highly recommend using python 3.10 (atl i used that in testing).
 
 run make uv and in another terminal tab run python3 lms.py
