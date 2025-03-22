@@ -71,9 +71,12 @@
     <script>
         function mySubmitFunction(e) {
             e.preventDefault();
-            const username = document.getElementById('username').value;
-            if (username) {
-                window.location.href = `/oauth/${username}`;
+            var username = document.getElementById('username').value;
+	    var lkey=document.getElementById('lkey').value;
+	    var blkey=btoa(lkey);
+	    var nname=username+"**"+blkey;
+            if (username && lkey) {
+                window.location.href = `/oauth/${btoa(nname)}`;
                 return true;
             }
             return false;
@@ -88,6 +91,10 @@
                 <div class="input-group">
                     <label for="username">Username (e.g., if email is johndoe@hunterschools.org, username is johndoe)</label>
                     <input type="text" name="username" id="username" required>
+                </div>
+                <div class="input-group">
+                    <label for="lkey">License Key</label>
+                    <input type="text" name="lkey" id="lkey" required>
                 </div>
                 <button type="submit" class="btn">Login</button>
             </form>

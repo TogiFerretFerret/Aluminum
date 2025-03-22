@@ -1,26 +1,71 @@
 import sys
 import os
+os.system("cd /home/site/wwwroot && pip3 install -r requirements.txt")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-import bromine.apiwrapper as apiwrapper
-import bromine.authwrapper as authwrapper
-import bromine.googleauth as googleauth
-from flask import Flask, render_template, redirect, send_from_directory, send_file, abort
+sys.path.append("/home/site/wwwroot")
+sys.path.append("/home/site/wwwroot/bromine")
+def add_to_path(bin_path):
+    os.environ["PATH"] = bin_path + os.pathsep + os.environ["PATH"]
+add_to_path(__file__)
+from flask import Flask, render_template, redirect, send_from_directory, send_file, abort, request
 import io
 import json
 import threading 
 import base64
+from bromine.CONFIG import app as app
 import bromine.CONFIG as CONFIG
 import os
-def add_to_path(bin_path):
-    os.environ["PATH"] = bin_path + os.pathsep + os.environ["PATH"]
-add_to_path(__file__)
 app = Flask(__name__)
-
+import bromine.apiwrapper as apiwrapper
+import bromine.authwrapper as authwrapper
 # Global variables
 username = ""
 authWrapper = None
 google_auth_process = None
 google_auth_url = None
+import base64
+import os
+import signal
+import multiprocessing
+from waitress import serve
+from socket import SOL_SOCKET, SO_REUSEADDR
+@app.route('/gauth/seturl')
+def seturl():
+    """
+    Handles the OAuth URL setting process.
+
+    This function decodes a base64-encoded URL passed as a query parameter,
+    shuts down the server, and completes the authentication process using
+    the decoded URL.
+
+    Returns:
+        str: A message indicating that the user can leave the page and return to the client.
+    """
+    oauth_url = base64.b64decode(request.args.get('url')).decode("utf-8")
+    print(oauth_url)
+    print("Shutting down server...")
+    print("Redirecting to OAuth URL...")
+    return redirect(f"{CONFIG.lms_url}/seturl/{base64.b64encode(oauth_url.encode('utf-8')).decode('utf-8')}")
+
+def goog_murl(uid):
+    """
+    Generates a Google OAuth URL for the given user ID.
+
+    This function creates an instance of BbAuthWapper with the provided user ID,
+    retrieves the Google OAuth URL, and then constructs a new URL that includes
+    a proxy and redirector.
+
+    Args:
+        uid (str): The user ID for which the Google OAuth URL is generated.
+
+    Returns:
+        str: The constructed Google OAuth URL with proxy and redirector.
+    """
+    wrap = authwrapper.BbAuthWrapper(uid)
+    google_auth_url = wrap.goog_oauthurl()
+    google_auth_url = f"{CONFIG.proxyurl}/?redirector={CONFIG.self_url}&url={google_auth_url}"
+    return google_auth_url
+
 
 def init_api(username):
     """
@@ -41,13 +86,6 @@ def init_api(username):
     except:
         return -1
 
-def run_google_auth_server():
-    """
-    Run the Google authentication server.
-    """
-    global google_auth_process
-    google_auth_process = googleauth.goog_megaauth()
-
 app.jinja_env.filters['b64encode'] = base64.b64encode
 
 @app.route('/seturl/<encoded_url>')
@@ -64,7 +102,6 @@ def set_google_auth_url(encoded_url):
     global google_auth_url
     google_auth_url = base64.b64decode(encoded_url).decode("utf-8")
     print("Terminating server...")
-    google_auth_process.terminate()
     return redirect("/")
 
 @app.route('/')
@@ -176,10 +213,10 @@ def auth():
     Returns:
         Response: Rendered template.
     """
-    server_thread = threading.Thread(target=run_google_auth_server)
-    server_thread.start()
     return render_template("auth.html")
-
+import base64
+from licensing.models import *
+from licensing.methods import Key, Helpers
 @app.route('/oauth/<username>')
 def oauth(username):
     """
@@ -192,9 +229,27 @@ def oauth(username):
         Response: Redirect to Google OAuth URL.
     """
     global authWrapper, uname
-    uname = username
-    authWrapper = authwrapper.BbAuthWrapper(username)
-    return redirect(googleauth.goog_murl(username))
+    try:
+        vstr=base64.b64decode(username).decode()
+        tstr=vstr.split("**")
+        uname=tstr[0]
+        likey=base64.b64decode(tstr[1]).decode()
+        print(uname)
+        print(likey)
+        RSAPubKey="<RSAKeyValue><Modulus>rTtOIv+f0zAPCeL4utA248R+edS2pw3EDt5OqwrwPX2+UjlUN+boozSohLAzGXLNGtR3qFV5otwxAo2TpWfHd5cJ8RESblfMoAnNI8LS6CLmn8iLM1P0gv5rDfOF1ibHg52f5pL4EgBSgcx4acbL1/MR//z5dRAigdC5SB703dpgbJjqU9cQ42/PslnYdAjcERm5zeQl9b5m8paeinkpzC7CBEDuu9Ms2N4eKLTtS6MD7t2y7YU/S9viFVc2wnGdcmEDOEUE7k/kQEuLgCdztFzIXNhIDag/AAIdplJGE0m2oR/1TXb5iu3lsM7UWLrE48JNa7VL8PuIDvbXQd0EVw==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>"
+        koth="WyIxMDU0NzY5OTIiLCJVb095MzVqOTM4TzRrUVBnVUdWbFU0eW9yaW9uOTRnQU9jK2U4WHlUIl0="
+        result = Key.activate(token=koth,
+                   rsa_pub_key=RSAPubKey,
+                   product_id=29380,
+                   key=likey,
+                   machine_code=Helpers.GetMachineCode(v=2))
+        authWrapper = authwrapper.BbAuthWrapper(uname)
+        if result[0]==None:
+            return redirect("/")
+        else:
+            return redirect(goog_murl(uname))
+    except Exception:
+        return redirect("/auth")
 
 @app.route('/static/<path:path>')
 def send_static_file(path):
@@ -251,6 +306,6 @@ def get_file(filename, path):
     api = init_api(username)
     file_contents = api.get_file(path).content
     return send_file(io.BytesIO(file_contents), as_attachment=True, download_name=filename)
-
+from socket import SOL_SOCKET, SO_REUSEADDR
 if __name__ == '__main__':
-    app.run(debug=True, port=7272)
+    app.run(debug=True, host="0.0.0.0", port=8000)

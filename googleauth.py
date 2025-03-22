@@ -6,11 +6,9 @@ from flask import Flask, request, redirect
 from waitress import serve
 import bromine.authwrapper as authwrapper
 import bromine.CONFIG as CONFIG
-
-PORT = 7420
-app = Flask(__name__)
-
-@app.route('/seturl')
+from socket import SOL_SOCKET, SO_REUSEADDR
+from bromine.CONFIG import app as app
+@app.route('/gauth/seturl')
 def seturl():
     """
     Handles the OAuth URL setting process.
@@ -56,7 +54,8 @@ def run_server():
         None
     """
     print("Starting server...")
-    serve(app, host='127.0.0.1', port=PORT)
+    app.wsgi_app.socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+    serve(app, host='0.0.0.0', port=PORT)
     print("Server started.")
 
 def goog_murl(uid):
