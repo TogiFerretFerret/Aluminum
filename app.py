@@ -1,13 +1,10 @@
 import sys
 import os
-os.system("cd /home/site/wwwroot && pip3 install -r requirements.txt")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append("/home/site/wwwroot")
-sys.path.append("/home/site/wwwroot/bromine")
 def add_to_path(bin_path):
     os.environ["PATH"] = bin_path + os.pathsep + os.environ["PATH"]
 add_to_path(__file__)
-from flask import Flask, render_template, redirect, send_from_directory, send_file, abort, request
+from flask import Flask, render_template, redirect, send_from_directory, send_file, abort, request, make_response
 import io
 import json
 import threading 
@@ -18,17 +15,46 @@ import os
 app = Flask(__name__)
 import bromine.apiwrapper as apiwrapper
 import bromine.authwrapper as authwrapper
-# Global variables
-username = ""
-authWrapper = None
-google_auth_process = None
-google_auth_url = None
 import base64
 import os
 import signal
 import multiprocessing
 from waitress import serve
 from socket import SOL_SOCKET, SO_REUSEADDR
+from licensing.models import *
+from licensing.methods import Key, Helpers
+import pickle
+class UserObject:
+    def __init__(self):
+        self.username =  ""
+        self.authWrapper = None
+        self.google_auth_url = None
+        self.google_auth_process = None
+        self.license = ""
+
+def toObj(pstring):
+    """
+    Converts a pickled string back to a UserObject.
+
+    Args:
+        pstring (str): The pickled string representation of the UserObject.
+
+    Returns:
+        UserObject: The deserialized UserObject.
+    """
+    return pickle.loads(base64.b64decode(pstring))
+def toStr(obj):
+    """
+    Converts a UserObject to a pickled string.
+
+    Args:
+        obj (UserObject): The UserObject to serialize.
+
+    Returns:
+        str: The pickled string representation of the UserObject.
+    """
+    return base64.b64encode(pickle.dumps(obj)).decode('utf-8')
+
 @app.route('/gauth/seturl')
 def seturl():
     """
@@ -47,7 +73,7 @@ def seturl():
     print("Redirecting to OAuth URL...")
     return redirect(f"{CONFIG.lms_url}/seturl/{base64.b64encode(oauth_url.encode('utf-8')).decode('utf-8')}")
 
-def goog_murl(uid):
+def goog_murl(uid, google_auth_url):
     """
     Generates a Google OAuth URL for the given user ID.
 
@@ -61,13 +87,16 @@ def goog_murl(uid):
     Returns:
         str: The constructed Google OAuth URL with proxy and redirector.
     """
+    print(uid)
+    print(google_auth_url)
     wrap = authwrapper.BbAuthWrapper(uid)
-    google_auth_url = wrap.goog_oauthurl()
-    google_auth_url = f"{CONFIG.proxyurl}/?redirector={CONFIG.self_url}&url={google_auth_url}"
-    return google_auth_url
+    print(wrap.state)
+    gauth_url = wrap.goog_oauthurl()
+    goauth_url = f"{CONFIG.proxyurl}/?redirector={CONFIG.self_url}&url={gauth_url}"
+    return goauth_url
 
 
-def init_api(username):
+def init_api(username,authWrapper):
     """
     Initialize the API wrapper with the bearer token.
 
@@ -99,10 +128,21 @@ def set_google_auth_url(encoded_url):
     Returns:
         Response: Redirect to the home page.
     """
-    global google_auth_url
-    google_auth_url = base64.b64decode(encoded_url).decode("utf-8")
-    print("Terminating server...")
-    return redirect("/")
+    cookie = request.cookies.get("user")
+    print(cookie)
+    if cookie is None:
+        print("wtfrick")
+        return redirect("/auth")
+    uobj = toObj(cookie)
+    username = uobj.username
+    authWrapper = uobj.authWrapper
+    uobj.google_auth_url = base64.b64decode(encoded_url).decode("utf-8")
+    uobj.authWrapper.goog_code(uobj.google_auth_url)
+    uobj.authWrapper.get_authsvctoken()
+    print("ASVC",uobj.authWrapper.asvc)
+    resp= make_response(redirect("/"))
+    resp.set_cookie("user", toStr(uobj), max_age=60*60*24*7)
+    return resp
 
 @app.route('/')
 def index():
@@ -112,15 +152,19 @@ def index():
     Returns:
         Response: Rendered template or redirect response.
     """
+    cookie = request.cookies.get("user")
+    print(cookie)
+    if cookie is None:
+        return redirect("/auth")
+    uobj = toObj(cookie)
+    username = uobj.username
+    authWrapper = uobj.authWrapper
+    print(authWrapper)
+    print(username)
     if authWrapper is not None:
-        try:
-            authWrapper.goog_code(google_auth_url)
-            authWrapper.get_authsvctoken()
-        except:
-            return redirect("/auth")
-    if authWrapper is not None:
+        print(authWrapper.asvc)
         if authWrapper.asvc is not None:
-            api = init_api(username)
+            api = init_api(username, authWrapper)
             if api == -1:
                 return redirect("/auth")
             classes = api.get_classes()
@@ -136,8 +180,7 @@ def grades():
     Handle the grades route (not implemented).
 
     Returns:
-        Response: 501 Not Implemented.
-    """
+        Response: 501 Not Implemented."""
     abort(501)
 
 @app.route('/calendar')
@@ -161,8 +204,14 @@ def class_details(class_id):
     Returns:
         Response: Rendered template or redirect response.
     """
+    cookie = request.cookies.get("user")
+    if cookie is None:
+        return redirect("/auth")
+    uobj = toObj(cookie)
+    username = uobj.username
+    authWrapper = uobj.authWrapper
     if authWrapper.asvc is not None:
-        api = init_api(username)
+        api = init_api(username, authWrapper)
         class_details = api.get_class(class_id)
         if len(class_details) == 2:
             for c in class_details:
@@ -192,8 +241,14 @@ def assignment_details(class_id, assignment_id):
     Returns:
         Response: Rendered template or redirect response.
     """
+    cookie = request.cookies.get("user")
+    if cookie is None:
+        return redirect("/auth")
+    uobj = toObj(cookie)
+    username = uobj.username
+    authWrapper = uobj.authWrapper
     if authWrapper.asvc is not None:
-        api = init_api(username)
+        api = init_api(username, authWrapper)
         class_details = api.get_class(class_id)
         if len(class_details) == 2:
             for c in class_details:
@@ -213,12 +268,12 @@ def auth():
     Returns:
         Response: Rendered template.
     """
-    return render_template("auth.html")
-import base64
-from licensing.models import *
-from licensing.methods import Key, Helpers
-@app.route('/oauth/<username>')
-def oauth(username):
+    resp=make_response(render_template("auth.html"))
+    uobj = UserObject()
+    resp.set_cookie("user", toStr(uobj), max_age=60*60*24*7)
+    return resp
+@app.route('/oauth/<uname>')
+def oauth(uname):
     """
     Handle OAuth authentication.
 
@@ -228,14 +283,16 @@ def oauth(username):
     Returns:
         Response: Redirect to Google OAuth URL.
     """
-    global authWrapper, uname
     try:
-        vstr=base64.b64decode(username).decode()
+        vstr=base64.b64decode(uname).decode()
         tstr=vstr.split("**")
-        uname=tstr[0]
+        cookie = request.cookies.get("user")
         likey=base64.b64decode(tstr[1]).decode()
-        print(uname)
-        print(likey)
+        uobj = None
+        if cookie is not None:
+            uobj = toObj(cookie)
+            uobj.username = tstr[0]
+            uobj.authWrapper = authwrapper.BbAuthWrapper(uobj.username)
         RSAPubKey="<RSAKeyValue><Modulus>rTtOIv+f0zAPCeL4utA248R+edS2pw3EDt5OqwrwPX2+UjlUN+boozSohLAzGXLNGtR3qFV5otwxAo2TpWfHd5cJ8RESblfMoAnNI8LS6CLmn8iLM1P0gv5rDfOF1ibHg52f5pL4EgBSgcx4acbL1/MR//z5dRAigdC5SB703dpgbJjqU9cQ42/PslnYdAjcERm5zeQl9b5m8paeinkpzC7CBEDuu9Ms2N4eKLTtS6MD7t2y7YU/S9viFVc2wnGdcmEDOEUE7k/kQEuLgCdztFzIXNhIDag/AAIdplJGE0m2oR/1TXb5iu3lsM7UWLrE48JNa7VL8PuIDvbXQd0EVw==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>"
         koth="WyIxMDU0NzY5OTIiLCJVb095MzVqOTM4TzRrUVBnVUdWbFU0eW9yaW9uOTRnQU9jK2U4WHlUIl0="
         result = Key.activate(token=koth,
@@ -243,11 +300,14 @@ def oauth(username):
                    product_id=29380,
                    key=likey,
                    machine_code=Helpers.GetMachineCode(v=2))
-        authWrapper = authwrapper.BbAuthWrapper(uname)
+        print(result[0])
         if result[0]==None:
             return redirect("/")
         else:
-            return redirect(goog_murl(uname))
+            uobj.license = likey
+            resp=make_response(redirect(goog_murl(uobj.username, uobj.google_auth_url)))
+            resp.set_cookie("user", toStr(uobj), max_age=60*60*24*7)
+            return resp
     except Exception:
         return redirect("/auth")
 
@@ -272,9 +332,10 @@ def logout():
     Returns:
         Response: Redirect to home page.
     """
-    global authWrapper
-    authWrapper = None
-    return redirect("/")
+    cookie = request.cookies.get("user")
+    resp= make_response(redirect("/"))
+    resp.set_cookie("user", "", expires=0)
+    return resp
 
 @app.route('/update_assignment_status/<assignment_id>/<status>', methods=['POST'])
 def update_assignment_status(assignment_id, status):
@@ -288,7 +349,12 @@ def update_assignment_status(assignment_id, status):
     Returns:
         Response: JSON response with the update result.
     """
-    api = init_api(username)
+    cookie = request.cookies.get("user")
+    if cookie is None:
+        return redirect("/auth")
+    uobj = toObj(cookie)
+    username = uobj.username
+    api = init_api(username, uobj.authWrapper)
     return api.update_assstatus(assignment_id, status).json()
 
 @app.route('/getfile/<filename>/<path>')
@@ -303,9 +369,14 @@ def get_file(filename, path):
     Returns:
         Response: File download response.
     """
-    api = init_api(username)
+    cookie = request.cookies.get("user")
+    if cookie is None:
+        return redirect("/auth")
+    uobj = toObj(cookie)
+    username = uobj.username
+    api = init_api(username, uobj.authWrapper)
     file_contents = api.get_file(path).content
     return send_file(io.BytesIO(file_contents), as_attachment=True, download_name=filename)
 from socket import SOL_SOCKET, SO_REUSEADDR
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=8000)
+    app.run(debug=True, host="0.0.0.0", port=7272)

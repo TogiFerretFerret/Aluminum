@@ -45,13 +45,13 @@ class BbAuthWrapper:
         self.name = name
         self.tt = None
         self.asvc = None
-        self._asis = None
+        self.asis = None
         self._gcode = None
         self.bearer = None
         url = f"https://sts.sky.blackbaud.com/azureadb2c/state?login_hint={name}%40hunterschools.org&redirectUrl=https%3A%2F%2Fhunterschools.myschoolapp.com%2Fapp%3FsvcId%3Dedu%26envId%3Dp-9A4jO0o5LESTJyyg7MVsCA%26bb_id%3D1%23login&bbcid=spa-signin"
         resp = requests.post(url, headers={"content-type": "application/json", "origin": "https://app.blackbaud.com", "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"}, data='{"redirect_url":"https://hunterschools.myschoolapp.com/app?svcId=edu&envId=p-9A4jO0o5LESTJyyg7MVsCA&bb_id=1#login","embedded":false,"custom_branding_present":true}')
-        self._state=resp.json()['state']
-        self._asis = resp.headers['set-cookie'].split(";")[0]
+        self.state=resp.json()['state']
+        self.asis = resp.headers['set-cookie'].split(";")[0]
     def goog_oauthurl(self):
         """
         Generates the Google OAuth URL for authentication.
@@ -61,7 +61,7 @@ class BbAuthWrapper:
         Returns:
             str: The constructed OAuth URL.
         """
-        unfurl=f"https://id.blackbaud.com/bbid.onmicrosoft.com/B2C_1A_OIDC/oauth2/v2.0/authorize?response_type=code&response_mode=query&scope=openid&client_id=886aaf26-fc86-43b6-a838-fdc1eef0c3f9&redirect_uri=https%3a%2f%2fsts.sky.blackbaud.com%2fazureadb2c%2fcallback%2fbbid%2fB2C_1A_OIDC&state={self._state}&login_hint={self.name}%40Hunterschools.org&domain_hint=hunterschools-org"
+        unfurl=f"https://id.blackbaud.com/bbid.onmicrosoft.com/B2C_1A_OIDC/oauth2/v2.0/authorize?response_type=code&response_mode=query&scope=openid&client_id=886aaf26-fc86-43b6-a838-fdc1eef0c3f9&redirect_uri=https%3a%2f%2fsts.sky.blackbaud.com%2fazureadb2c%2fcallback%2fbbid%2fB2C_1A_OIDC&state={self.state}&login_hint={self.name}%40Hunterschools.org&domain_hint=hunterschools-org"
         return unfurl
     def goog_code(self, oauth_url_final):
         """
@@ -86,7 +86,7 @@ class BbAuthWrapper:
         Returns:
             str: The authentication service token extracted from the response headers.
         """
-        r=requests.get(f"https://sts.sky.blackbaud.com/azureadb2c/callback/bbid/B2C_1A_OIDC?state={self._state}&code={self._gcode}", headers={"cookie": self._asis, "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"},allow_redirects=False)
+        r=requests.get(f"https://sts.sky.blackbaud.com/azureadb2c/callback/bbid/B2C_1A_OIDC?state={self.state}&code={self._gcode}", headers={"cookie": self.asis, "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"},allow_redirects=False)
         self.asvc=r.headers["Set-Cookie"].split(";")[9].split(", ")[1]
         return self.asvc
     def get_bearer_token(self):

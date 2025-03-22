@@ -1,6 +1,6 @@
 proxyurl="https://iodine.azurewebsites.net"
-self_url="https://aluminum.azurewebsites.net/gauth"
-lms_url="https://aluminum.azurewebsites.net"
+self_url="http://localhost:7272/gauth"
+lms_url="http://localhost:7272"
 app=None
 '''
 proxyurl="http://localhost:8080"
