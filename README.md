@@ -34,7 +34,7 @@ Yeah, it works on windows. There's litearlly a bat file right there. Moron.
 Basically, I didn't want to rewrite Ultraviolet (the proxy used for Google Authentication) when I made this, so uhh, have fun! And I wasn't going to write the rest of the app in JS, though DarkSystemGit (if he isn't working on Atto-24) should be responsible for the JS framework (still private, part of the Bromine Initiative (i havent even added all the api endpoints in this repo to it yet)
 #### Why is the googleauth.py absolute garbage
 I'll fix it eventually. It had to do with me debugging. It's less bad now.
-
+like its gone now actually, i integrated it during the azure catastrophy of right fuckin' now.
 
 
 
