@@ -24,6 +24,7 @@ from socket import SOL_SOCKET, SO_REUSEADDR
 from licensing.models import *
 from licensing.methods import Key, Helpers
 import pickle
+import zlib
 class UserObject:
     def __init__(self):
         self.username =  ""
@@ -42,7 +43,12 @@ def toObj(pstring):
     Returns:
         UserObject: The deserialized UserObject.
     """
-    return pickle.loads(base64.b64decode(pstring))
+    b64d= base64.b64decode(pstring.encode('utf-8'))
+    zlibbed2 = zlib.decompress(b64d)
+    base64bed = base64.b64decode(zlibbed2)
+    zlibbed = zlib.decompress(base64bed)
+    pickled = pickle.loads(zlibbed)
+    return pickled
 def toStr(obj):
     """
     Converts a UserObject to a pickled string.
@@ -53,7 +59,12 @@ def toStr(obj):
     Returns:
         str: The pickled string representation of the UserObject.
     """
-    return base64.b64encode(pickle.dumps(obj)).decode('utf-8')
+    pickled= pickle.dumps(obj)
+    zlibbed = zlib.compress(pickled)
+    base64bed = base64.b64encode(zlibbed)
+    zlibbed2 = zlib.compress(base64bed)
+    b64d = base64.b64encode(zlibbed2).decode('utf-8')
+    return b64d
 
 @app.route('/gauth/seturl')
 def seturl():
