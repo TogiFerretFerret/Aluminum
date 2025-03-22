@@ -319,9 +319,9 @@ def oauth(uname):
             resp=make_response(redirect(goog_murl(uobj.username, uobj.google_auth_url)))
             resp.set_cookie("user", toStr(uobj), max_age=60*60*24*7)
             return resp
-    except Exception:
         return redirect("/auth")
-
+    except Exception:
+        return redirect("/")
 @app.route('/static/<path:path>')
 def send_static_file(path):
     """
@@ -344,7 +344,7 @@ def logout():
         Response: Redirect to home page.
     """
     cookie = request.cookies.get("user")
-    resp= make_response(redirect("/"))
+    resp= make_response(redirect(f"{CONFIG.proxyurl}/?redirector={CONFIG.lms_url}&url=https://www.google.com/accounts/Logout"))
     resp.set_cookie("user", "", expires=0)
     return resp
 
@@ -390,4 +390,4 @@ def get_file(filename, path):
     return send_file(io.BytesIO(file_contents), as_attachment=True, download_name=filename)
 from socket import SOL_SOCKET, SO_REUSEADDR
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=7272)
+    app.run(debug=True, host="0.0.0.0", port=8000)
