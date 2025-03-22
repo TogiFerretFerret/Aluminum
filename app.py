@@ -4,7 +4,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 def add_to_path(bin_path):
     os.environ["PATH"] = bin_path + os.pathsep + os.environ["PATH"]
 add_to_path(__file__)
-from flask import Flask, render_template, redirect, send_from_directory, send_file, abort, request, make_response
+from flask import Flask, render_template, redirect, send_from_directory, send_file, abort, request, make_response, session
+from flask_session import Session
 import io
 import json
 import threading 
@@ -24,6 +25,18 @@ from socket import SOL_SOCKET, SO_REUSEADDR
 from licensing.models import *
 from licensing.methods import Key, Helpers
 import pickle
+import uuid
+
+# Initialize Session object and configure session settings
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_USE_SIGNER'] = True
+app.config['SESSION_KEY_PREFIX'] = 'session:'
+app.config['SESSION_FILE_DIR'] = './flask_session/'
+app.config['SESSION_FILE_THRESHOLD'] = 100
+app.config['SESSION_FILE_MODE'] = 600
+Session(app)
+
 class UserObject:
     def __init__(self):
         self.username =  ""
@@ -31,29 +44,32 @@ class UserObject:
         self.google_auth_url = None
         self.google_auth_process = None
         self.license = ""
+        self.session_id = str(uuid.uuid4())  # Unique session ID
 
-def toObj(pstring):
+def toObj(session_id):
     """
-    Converts a pickled string back to a UserObject.
+    Retrieves a UserObject from the session store.
 
     Args:
-        pstring (str): The pickled string representation of the UserObject.
+        session_id (str): The unique session ID.
 
     Returns:
         UserObject: The deserialized UserObject.
     """
-    return pickle.loads(base64.b64decode(pstring))
+    return session.get(session_id)
+
 def toStr(obj):
     """
-    Converts a UserObject to a pickled string.
+    Stores a UserObject in the session store.
 
     Args:
-        obj (UserObject): The UserObject to serialize.
+        obj (UserObject): The UserObject to store.
 
     Returns:
-        str: The pickled string representation of the UserObject.
+        str: The unique session ID.
     """
-    return base64.b64encode(pickle.dumps(obj)).decode('utf-8')
+    session[obj.session_id] = obj
+    return obj.session_id
 
 @app.route('/gauth/seturl')
 def seturl():
@@ -128,12 +144,12 @@ def set_google_auth_url(encoded_url):
     Returns:
         Response: Redirect to the home page.
     """
-    cookie = request.cookies.get("user")
-    print(cookie)
-    if cookie is None:
+    session_id = request.cookies.get("session_id")
+    print(session_id)
+    if session_id is None:
         print("wtfrick")
         return redirect("/auth")
-    uobj = toObj(cookie)
+    uobj = toObj(session_id)
     username = uobj.username
     authWrapper = uobj.authWrapper
     uobj.google_auth_url = base64.b64decode(encoded_url).decode("utf-8")
@@ -141,7 +157,7 @@ def set_google_auth_url(encoded_url):
     uobj.authWrapper.get_authsvctoken()
     print("ASVC",uobj.authWrapper.asvc)
     resp= make_response(redirect("/"))
-    resp.set_cookie("user", toStr(uobj), max_age=60*60*24*7)
+    resp.set_cookie("session_id", toStr(uobj), max_age=60*60*24*7)
     return resp
 
 @app.route('/')
@@ -152,11 +168,11 @@ def index():
     Returns:
         Response: Rendered template or redirect response.
     """
-    cookie = request.cookies.get("user")
-    print(cookie)
-    if cookie is None:
+    session_id = request.cookies.get("session_id")
+    print(session_id)
+    if session_id is None:
         return redirect("/auth")
-    uobj = toObj(cookie)
+    uobj = toObj(session_id)
     username = uobj.username
     authWrapper = uobj.authWrapper
     print(authWrapper)
@@ -204,10 +220,10 @@ def class_details(class_id):
     Returns:
         Response: Rendered template or redirect response.
     """
-    cookie = request.cookies.get("user")
-    if cookie is None:
+    session_id = request.cookies.get("session_id")
+    if session_id is None:
         return redirect("/auth")
-    uobj = toObj(cookie)
+    uobj = toObj(session_id)
     username = uobj.username
     authWrapper = uobj.authWrapper
     if authWrapper.asvc is not None:
@@ -241,10 +257,10 @@ def assignment_details(class_id, assignment_id):
     Returns:
         Response: Rendered template or redirect response.
     """
-    cookie = request.cookies.get("user")
-    if cookie is None:
+    session_id = request.cookies.get("session_id")
+    if session_id is None:
         return redirect("/auth")
-    uobj = toObj(cookie)
+    uobj = toObj(session_id)
     username = uobj.username
     authWrapper = uobj.authWrapper
     if authWrapper.asvc is not None:
@@ -270,7 +286,7 @@ def auth():
     """
     resp=make_response(render_template("auth.html"))
     uobj = UserObject()
-    resp.set_cookie("user", toStr(uobj), max_age=60*60*24*7)
+    resp.set_cookie("session_id", toStr(uobj), max_age=60*60*24*7)
     return resp
 @app.route('/oauth/<uname>')
 def oauth(uname):
@@ -286,11 +302,11 @@ def oauth(uname):
     try:
         vstr=base64.b64decode(uname).decode()
         tstr=vstr.split("**")
-        cookie = request.cookies.get("user")
+        session_id = request.cookies.get("session_id")
         likey=base64.b64decode(tstr[1]).decode()
         uobj = None
-        if cookie is not None:
-            uobj = toObj(cookie)
+        if session_id is not None:
+            uobj = toObj(session_id)
             uobj.username = tstr[0]
             uobj.authWrapper = authwrapper.BbAuthWrapper(uobj.username)
         RSAPubKey="<RSAKeyValue><Modulus>rTtOIv+f0zAPCeL4utA248R+edS2pw3EDt5OqwrwPX2+UjlUN+boozSohLAzGXLNGtR3qFV5otwxAo2TpWfHd5cJ8RESblfMoAnNI8LS6CLmn8iLM1P0gv5rDfOF1ibHg52f5pL4EgBSgcx4acbL1/MR//z5dRAigdC5SB703dpgbJjqU9cQ42/PslnYdAjcERm5zeQl9b5m8paeinkpzC7CBEDuu9Ms2N4eKLTtS6MD7t2y7YU/S9viFVc2wnGdcmEDOEUE7k/kQEuLgCdztFzIXNhIDag/AAIdplJGE0m2oR/1TXb5iu3lsM7UWLrE48JNa7VL8PuIDvbXQd0EVw==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>"
@@ -306,7 +322,7 @@ def oauth(uname):
         else:
             uobj.license = likey
             resp=make_response(redirect(goog_murl(uobj.username, uobj.google_auth_url)))
-            resp.set_cookie("user", toStr(uobj), max_age=60*60*24*7)
+            resp.set_cookie("session_id", toStr(uobj), max_age=60*60*24*7)
             return resp
     except Exception:
         return redirect("/auth")
@@ -332,9 +348,9 @@ def logout():
     Returns:
         Response: Redirect to home page.
     """
-    cookie = request.cookies.get("user")
+    session_id = request.cookies.get("session_id")
     resp= make_response(redirect("/"))
-    resp.set_cookie("user", "", expires=0)
+    resp.set_cookie("session_id", "", expires=0)
     return resp
 
 @app.route('/update_assignment_status/<assignment_id>/<status>', methods=['POST'])
@@ -349,10 +365,10 @@ def update_assignment_status(assignment_id, status):
     Returns:
         Response: JSON response with the update result.
     """
-    cookie = request.cookies.get("user")
-    if cookie is None:
+    session_id = request.cookies.get("session_id")
+    if session_id is None:
         return redirect("/auth")
-    uobj = toObj(cookie)
+    uobj = toObj(session_id)
     username = uobj.username
     api = init_api(username, uobj.authWrapper)
     return api.update_assstatus(assignment_id, status).json()
@@ -369,10 +385,10 @@ def get_file(filename, path):
     Returns:
         Response: File download response.
     """
-    cookie = request.cookies.get("user")
-    if cookie is None:
+    session_id = request.cookies.get("session_id")
+    if session_id is None:
         return redirect("/auth")
-    uobj = toObj(cookie)
+    uobj = toObj(session_id)
     username = uobj.username
     api = init_api(username, uobj.authWrapper)
     file_contents = api.get_file(path).content
