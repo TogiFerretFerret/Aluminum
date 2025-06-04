@@ -9,23 +9,41 @@
 <body>
     <script defer src="https://cdn.jsdelivr.net/npm/libcurl.js@0.7.1/libcurl.js" onload="libcurl.load_wasm('https://cdn.jsdelivr.net/npm/libcurl.js@0.7.1/libcurl.wasm');"></script>
     <script>
-        function a2d(arr) {
-            return arr.reduce((dict, [key, value]) => {
-                dict[key] = value;
-                return dict;
-            }, {});
+        let a2d=(arr)=>arr.reduce((dict,[key,value])=>{dict[key]=value;return dict;},{});
+        var libcurl_loaded=false;
+        class BbAuthWrapper {
+            constructor(username){
+                if (libcurl_loaded==false){throw new Error("LibCurl not yet loaded!");}
+                this.username=username;
+                this.tt="";
+                this.asvc="";
+                this.gcode="";
+                this.bearer="";
+                this.state="";
+                this.asis="";
             }
+            async init(){
+                let init_resp=await libcurl.fetch(`https://sts.sky.blackbaud.com/azureadb2c/state?login_hint=${this.username}%40hunterschools.org&redirectUrl=https%3A%2F%2Fhunterschools.myschoolapp.com%2Fapp%3FsvcId%3Dedu%26envId%3Dp-9A4jO0o5LESTJyyg7MVsCA%26bb_id%3D1%23login&bbcid=spa-signin`,{method: 'POST',headers: {'Content-Type': 'application/json','origin': 'https://app.blackbaud.com'},body:'{"redirect_url":"https://hunterschools.myschoolapp.com/app?svcId=edu&envId=p-9A4jO0o5LESTJyyg7MVsCA&bb_id=1#login","embedded":false,"custom_branding_present":true}'})
+                this.state=(await init_resp.json())['state']
+                this.asis=a2d(init_resp.raw_headers)['set-cookie'].split(";")[0]
+            }
+            google_oauthurl(){
+                return `https://id.blackbaud.com/bbid.onmicrosoft.com/B2C_1A_OIDC/oauth2/v2.0/authorize?response_type=code&response_mode=query&scope=openid&client_id=886aaf26-fc86-43b6-a838-fdc1eef0c3f9&redirect_uri=https%3a%2f%2fsts.sky.blackbaud.com%2fazureadb2c%2fcallback%2fbbid%2fB2C_1A_OIDC&state=${this.state}&login_hint=${this.username}%40Hunterschools.org&domain_hint=hunterschools-org`
+            }
+        }
+        let wisp_urls=["wss://math.americahistory.online/wisp/","wss://lichology.com/wisp/","wss://mages.io/wisp/","wss://onlinegames.ro/wisp/","wss://onlinegames.ro/wisp/","wss://wisp.rhw.one/ws/"] // Not actively maintained list?
         document.addEventListener("libcurl_load", ()=>{
-            libcurl.set_websocket(`wss://wisp.rhw.one/ws/`);
+            libcurl.set_websocket(wisp_urls[0]);
             console.log("libcurl.js ready!");
-            main();
+            document.getElementById("libcurl_state").innerText="LibCurl.js ready!"
+            libcurl_loaded=true;
         });
-        async function main(){
-            var username="hudsonreich"
-            var init_resp=await libcurl.fetch(`https://sts.sky.blackbaud.com/azureadb2c/state?login_hint=${username}%40hunterschools.org&redirectUrl=https%3A%2F%2Fhunterschools.myschoolapp.com%2Fapp%3FsvcId%3Dedu%26envId%3Dp-9A4jO0o5LESTJyyg7MVsCA%26bb_id%3D1%23login&bbcid=spa-signin`,{method: 'POST',headers: {'Content-Type': 'application/json','origin': 'https://app.blackbaud.com'},body:'{"redirect_url":"https://hunterschools.myschoolapp.com/app?svcId=edu&envId=p-9A4jO0o5LESTJyyg7MVsCA&bb_id=1#login","embedded":false,"custom_branding_present":true}'})
-            var state=(await init_resp.json())['state']
-            var asis=a2d(init_resp.raw_headers)['set-cookie'].split(";")[0]
+        async function unittest(){
+            var test=new BbAuthWrapper("hudsonreich");
+            await test.init()
+            console.log(test.google_oauthurl())
         }
     </script>
+    <div id="libcurl_state">LibCurl.js NOT Ready</div>
 </body>
 </html>
